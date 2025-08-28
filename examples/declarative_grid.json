@@ -1,0 +1,34 @@
+{
+  "data": {
+    "header": {
+      "title": "Grid Layout Demo",
+      "date_note": "Disposition en grille avec références aux données"
+    },
+    "quarterly_kpis": [
+      { "title": "Q1 Revenue", "value": "1,234k€", "delta": { "pct": 25 } },
+      { "title": "Q2 Revenue", "value": "1,567k€", "delta": { "pct": 18 } },
+      { "title": "Q3 Revenue", "value": "1,890k€", "delta": { "pct": 12 } },
+      { "title": "Q4 Revenue", "value": "2,123k€", "delta": { "pct": 8 } },
+      { "title": "YTD Total", "value": "6,814k€", "delta": { "pct": 15 } },
+      { "title": "Annual Target", "value": "6,500k€", "delta": { "pct": 0 } }
+    ]
+  },
+  "layout": [
+    {
+      "type": "title",
+      "data_ref": "header"
+    },
+    {
+      "type": "grid",
+      "properties": { "columns": 3, "gap": 20 },
+      "children": [
+        { "type": "kpi_card", "data_ref": "quarterly_kpis.0" },
+        { "type": "kpi_card", "data_ref": "quarterly_kpis.1" },
+        { "type": "kpi_card", "data_ref": "quarterly_kpis.2" },
+        { "type": "kpi_card", "data_ref": "quarterly_kpis.3" },
+        { "type": "kpi_card", "data_ref": "quarterly_kpis.4" },
+        { "type": "kpi_card", "data_ref": "quarterly_kpis.5" }
+      ]
+    }
+  ]
+}

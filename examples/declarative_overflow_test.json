@@ -1,0 +1,111 @@
+{
+  "data": {
+    "header": {
+      "title": "Layout Overflow Test Dashboard",
+      "date_note": "Testing text truncation and wrapping with very long content - Q4 2024"
+    },
+    "problematic_kpis": [
+      {
+        "title": "Very Long KPI Title That Should Be Truncated Properly",
+        "value": "€9,999,999,999.99",
+        "delta": { "pct": 45 }
+      },
+      {
+        "title": "Short KPI",
+        "value": "Normal Value",
+        "delta": { "pct": -12 }
+      },
+      {
+        "title": "Another Extremely Long KPI Title That Definitely Will Not Fit In A Single Line",
+        "value": "€1,234,567,890.123456789",
+        "delta": { "pct": 156 }
+      },
+      {
+        "title": "OK",
+        "value": "Fine",
+        "delta": { "pct": 0 }
+      }
+    ],
+    "very_long_text": "This is an extremely long text that should wrap properly across multiple lines. It contains a lot of information that needs to be displayed in a readable format without overflowing the designated area. The text wrapping functionality should handle this gracefully and ensure that all content remains within the bounds of its container while maintaining good readability.",
+    "short_text": "Short summary text.",
+    "platform_table": [
+      ["Very Long Platform Name That Should Not Overflow", "€2,890,000 (+28%)", "€2,234,000 (+25%)", "-€156,000 (+8%)", "€534,000 (+35%)", "€278,000 (+12%)"],
+      ["Mobile Application Platform", "€1,234,000 (+22%)", "€945,000 (+20%)", "-€89,000 (+15%)", "€267,000 (+28%)", "€156,000 (+18%)"],
+      ["Short", "€443,000 (+18%)", "€329,000 (+16%)", "-€34,000 (+22%)", "€98,000 (+25%)", "€67,000 (+15%)"]
+    ]
+  },
+  "layout": [
+    {
+      "type": "title",
+      "data_ref": "header"
+    },
+    {
+      "type": "text",
+      "properties": {
+        "text": "Testing Long Text Truncation",
+        "font": "heading",
+        "color": "#1a202c",
+        "align": "left",
+        "margin_bottom": 20
+      }
+    },
+    {
+      "type": "row",
+      "properties": { "gap": 15 },
+      "children": [
+        { "type": "kpi_card", "data_ref": "problematic_kpis.0" },
+        { "type": "kpi_card", "data_ref": "problematic_kpis.1" },
+        { "type": "kpi_card", "data_ref": "problematic_kpis.2" },
+        { "type": "kpi_card", "data_ref": "problematic_kpis.3" }
+      ]
+    },
+    {
+      "type": "spacer",
+      "properties": { "height": 30 }
+    },
+    {
+      "type": "text",
+      "properties": {
+        "text": "Long Text Wrapping Test",
+        "font": "heading",
+        "color": "#1a202c",
+        "align": "left",
+        "margin_bottom": 15
+      }
+    },
+    {
+      "type": "text",
+      "data_ref": "very_long_text",
+      "properties": {
+        "font": "body",
+        "color": "#64748b",
+        "align": "left",
+        "margin_bottom": 20
+      }
+    },
+    {
+      "type": "text",
+      "data_ref": "short_text",
+      "properties": {
+        "font": "body",
+        "color": "#64748b",
+        "align": "center",
+        "margin_bottom": 25
+      }
+    },
+    {
+      "type": "text",
+      "properties": {
+        "text": "Table Overflow Test",
+        "font": "heading",
+        "color": "#1a202c",
+        "align": "left",
+        "margin_bottom": 15
+      }
+    },
+    {
+      "type": "table",
+      "data_ref": "platform_table"
+    }
+  ]
+}
