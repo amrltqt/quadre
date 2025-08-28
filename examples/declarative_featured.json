@@ -1,4 +1,5 @@
 {
+  "canvas": { "height": "auto" },
   "title": "Featured Layout Demo",
   "date_note": "Mise en avant d'une métrique principale",
   "top_kpis": [
@@ -14,16 +15,16 @@
       "children": [
         {
           "type": "kpi_card",
-          "data_ref": 0,
+          "data_ref": "$.top_kpis[0]",
           "properties": {"width_ratio": 0.5}
         },
         {
           "type": "column",
           "properties": {"gap": 15},
           "children": [
-            {"type": "kpi_card", "data_ref": 1},
-            {"type": "kpi_card", "data_ref": 2},
-            {"type": "kpi_card", "data_ref": 3}
+            {"type": "kpi_card", "data_ref": "$.top_kpis[1]"},
+            {"type": "kpi_card", "data_ref": "$.top_kpis[2]"},
+            {"type": "kpi_card", "data_ref": "$.top_kpis[3]"}
           ]
         }
       ]

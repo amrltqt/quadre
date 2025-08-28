@@ -12,13 +12,10 @@ A Python CLI tool that generates beautiful dashboard images from JSON data using
 
 ## Installation
 
-Make sure you have Python 3.6+ and install the required dependencies:
+- Python: 3.12+
+- Recommended: [uv](https://github.com/astral-sh/uv) for fast, isolated runs
 
-```bash
-pip install pillow
-```
-
-Or use the Docker setup (recommended for production):
+Docker setup is also available (handy for production):
 
 ```bash
 # Build the Docker image
@@ -28,20 +25,20 @@ make build
 make run
 ```
 
-## Usage
+## Usage (uv)
 
 ### Basic Usage
 
 ```bash
-python main.py -i data.json
+uv run -m ezp.main -i data.json
 ```
 
-This will generate a `dashboard.png` file from your JSON data.
+This generates `dashboard.png` from your JSON data.
 
 ### Specify Output File
 
 ```bash
-python main.py -i data.json -o my_dashboard.png
+uv run -m ezp.main -i data.json -o my_dashboard.png
 ```
 
 ### Command Line Options
@@ -54,13 +51,13 @@ python main.py -i data.json -o my_dashboard.png
 
 ```bash
 # Generate dashboard with default output name
-python main.py -i example_data.json
+uv run -m ezp.main -i examples/flex_e2e.json
 
 # Generate dashboard with custom output name
-python main.py -i my_data.json -o report_2024.png
+uv run -m ezp.main -i my_data.json -o report_2024.png
 
 # Using long form arguments
-python main.py --input quarterly_data.json --output q4_report.png
+uv run -m ezp.main --input quarterly_data.json --output q4_report.png
 
 # Docker examples
 make run
@@ -109,92 +106,65 @@ You can override these variables:
 }
 ```
 
-See `example_data.json` for a complete working example.
+See `examples/flex_e2e.json` for a complete working example.
 
-## KPI Layout System
+## Legacy KPI Layouts (Optional)
 
-EZ Pillow provides flexible layout options for organizing your KPI cards. You can specify the layout type in your JSON data to control how KPIs are arranged.
-
-### Available Layout Types
-
-1. **`horizontal`** (default) - Standard horizontal row with equal-width cards
-2. **`priority`** - First KPI gets larger space (40%), others share remaining space
-3. **`grid_2x3`** - 2 rows × 3 columns grid layout
-4. **`grid_3x2`** - 3 rows × 2 columns grid layout  
-5. **`pyramid`** - Pyramid arrangement with fewer cards on top
-6. **`featured`** - One large card on left, others stacked vertically on right
-7. **`responsive`** - Auto-adapts based on KPI count (recommended)
-8. **`custom`** - Custom positioning with exact coordinates
-
-### Layout Configuration
-
-Add a `layout` section to your JSON data:
-
-```json
-{
-  "title": "My Dashboard",
-  "layout": {
-    "type": "priority"
-  },
-  "top_kpis": [...]
-}
-```
-
-### Layout Examples
-
-#### Priority Layout
-```json
-{
-  "layout": {
-    "type": "priority"
-  },
-  "top_kpis": [
-    {"title": "Main Revenue", "value": "2,847k€", "delta": {"pct": 18}},
-    {"title": "Users", "value": "156k", "delta": {"pct": -2}},
-    {"title": "Orders", "value": "8,901", "delta": {"pct": 8}},
-    {"title": "AOV", "value": "127€", "delta": {"pct": 7}}
-  ]
-}
-```
-
-#### Custom Layout
-```json
-{
-  "layout": {
-    "type": "custom",
-    "positions": [
-      {"x": 400, "y": 0, "width": 350},
-      {"x": 100, "y": 180, "width": 300},
-      {"x": 650, "y": 180, "width": 300}
-    ]
-  },
-  "top_kpis": [...]
-}
-```
-
-### Automatic Layout Suggestions
-
-When using `"type": "responsive"` or no layout specified, the system automatically chooses the best layout based on KPI count:
-
-- **1-4 KPIs** → `horizontal` layout
-- **5 KPIs** → `priority` layout (featured first KPI)
-- **6 KPIs** → `grid_2x3` layout
-- **7-8 KPIs** → `grid_3x2` layout
-- **9+ KPIs** → `pyramid` layout
+Older presets (horizontal, priority, grids, pyramid, featured, responsive, custom) remain available via the legacy or declarative paths. Flex is the default for new dashboards.
 
 ### Testing Layouts
 
-Generate examples of different layouts:
-
 ```bash
-# Generate layout comparison examples
-python examples/kpi_layouts_demo.py
+# Flex demos
+uv run examples/flex_demo.py
+uv run examples/flex_e2e.py
 
-# Test specific layout with your data
-python -m src.ezp.main your_data.json output.png
+# Render your JSON with the default (Flex) path
+uv run -m ezp.main your_data.json output.png
 ```
 
-This will create visual examples of all layout types in the `out/` directory.
+Images are written to `out/`.
+
+## Flex Layout (Default)
+
+The renderer now uses a flexbox-like engine under `src/ezp/flex` as the only path. It provides:
+
+- Flex containers with `direction` (row/column), `gap`, `align_items`, `padding`
+- Per-child `grow`, `shrink`, and `basis` properties to distribute space
+- Main-axis `justify_content`: start | center | end | space-between | space-around | space-evenly
+- Optional container background rendering with rounded corners
+- Simple `TextWidget` and `FixedBox` examples
+
+Auto-height is enabled by default: the image height grows to fit content (bounded). To force a fixed page height, set `"canvas": { "height": "fixed" }` or `"canvas": { "height": 1280 }`.
+
+High-quality rendering via supersampling is available (optional). Enable with:
+
+```json
+"canvas": {
+  "height": "auto",
+  "scale": 2.0,           // render at 2x
+  "downscale": true       // downscale to base size with Lanczos
+}
+```
+
+Run the demo:
+
+```bash
+python examples/flex_demo.py
+```
+
+This generates `out/flex_demo.png`. The main CLI also uses Flex for the default path.
+
+### End-to-End Example
+
+A JSON-driven example is also included:
+
+```bash
+python examples/flex_e2e.py               # uses examples/flex_e2e.json
+python examples/flex_e2e.py data.json out/flex_e2e.png
+```
+
+This renders a header, a KPI row, and a simple platform list using the Flex engine.
 
 ## JSON Data Format
 
@@ -332,7 +302,7 @@ Test font availability and configuration:
 
 ```bash
 # Run font diagnostic tool
-python utils/font_diagnostic.py
+uv run utils/font_diagnostic.py
 
 # This will show:
 # - Available system fonts
@@ -360,23 +330,15 @@ python utils/font_diagnostic.py
 
 ## Output
 
-The tool generates a 1920x1280 PNG image featuring:
+Default canvas: 1920×1280 PNG with:
 
-- **Header**: Title and date note
-- **Top KPIs**: Up to 5 key performance indicators with percentage changes
-- **Platform Table**: Tabular data with alternating row colors
-- **Middle Section**: 3 metric cards
-- **Bottom Section**: 5 metric cards
-- **Visual Indicators**: Green/red arrows for positive/negative changes
+- Header (title + date note)
+- KPI row (evenly distributed)
+- Platform table (auto columns, zebra rows)
 
 ## Customization
 
-You can modify the styling by editing the constants in `main.py`:
-
-- `W, H`: Image dimensions (default: 1920x1280)
-- `PADDING`: Page margins
-- `CARD_R`: Corner radius for rounded rectangles
-- Font sizes and colors in the style section
+Customize via `src/ezp/components/config.py` and Flex widgets in `src/ezp/flex`. The Flex renderer composes existing components (KPI cards, tables) with a simpler layout model.
 
 ## Font Support
 

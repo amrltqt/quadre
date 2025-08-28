@@ -227,7 +227,7 @@ echo "  cd ez-pillow"
 echo "  python utils/font_diagnostic.py"
 echo
 print_info "To generate a dashboard:"
-echo "  python -m src.ezp.main data.json out/dashboard.png"
+echo "  uv run -m ezp.main data.json out/dashboard.png"
 
 if [[ -n "$recommended_font" ]]; then
     echo

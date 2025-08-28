@@ -146,3 +146,63 @@ class FONTS:
     TABLE = load_font(24)
     SMALL = load_font(20)
     BOLD_SMALL = load_font(24, True)
+
+# ----- Scaling support (supersampling / DPI) -----
+_BASE_DIMENSIONS = {
+    'WIDTH': DIMENSIONS.WIDTH,
+    'HEIGHT': DIMENSIONS.HEIGHT,
+    'PADDING': DIMENSIONS.PADDING,
+    'CARD_RADIUS': DIMENSIONS.CARD_RADIUS,
+    'BUTTON_RADIUS': DIMENSIONS.BUTTON_RADIUS,
+    'KPI_CARD_HEIGHT': DIMENSIONS.KPI_CARD_HEIGHT,
+    'SECTION_CARD_HEIGHT_MID': DIMENSIONS.SECTION_CARD_HEIGHT_MID,
+    'SECTION_CARD_HEIGHT_BOTTOM': DIMENSIONS.SECTION_CARD_HEIGHT_BOTTOM,
+    'TABLE_HEADER_HEIGHT': DIMENSIONS.TABLE_HEADER_HEIGHT,
+    'TABLE_ROW_HEIGHT': DIMENSIONS.TABLE_ROW_HEIGHT,
+    'GAP_SMALL': DIMENSIONS.GAP_SMALL,
+    'GAP_MEDIUM': DIMENSIONS.GAP_MEDIUM,
+    'GAP_LARGE': DIMENSIONS.GAP_LARGE,
+}
+
+_BASE_FONT_SIZES = {
+    'H1': 42,
+    'H2': 30,
+    'NUMBER': 36,
+    'BODY': 24,
+    'TABLE': 24,
+    'SMALL': 20,
+    'BOLD_SMALL': 24,
+}
+
+_CURRENT_SCALE = 1.0
+
+
+def set_scale(scale: float) -> None:
+    """Apply a global scale factor to dimensions and fonts.
+
+    Useful for supersampling: render at 2x/3x then optionally downscale.
+    """
+    global _CURRENT_SCALE
+    _CURRENT_SCALE = float(scale) if scale and scale > 0 else 1.0
+
+    # Scale dimensions (round to ints)
+    for k, v in _BASE_DIMENSIONS.items():
+        setattr(DIMENSIONS, k, int(v * _CURRENT_SCALE))
+
+    # Recreate fonts at scaled sizes
+    FONTS.H1 = load_font(int(_BASE_FONT_SIZES['H1'] * _CURRENT_SCALE), True)
+    FONTS.H2 = load_font(int(_BASE_FONT_SIZES['H2'] * _CURRENT_SCALE), True)
+    FONTS.NUMBER = load_font(int(_BASE_FONT_SIZES['NUMBER'] * _CURRENT_SCALE), True)
+    FONTS.BODY = load_font(int(_BASE_FONT_SIZES['BODY'] * _CURRENT_SCALE))
+    FONTS.TABLE = load_font(int(_BASE_FONT_SIZES['TABLE'] * _CURRENT_SCALE))
+    FONTS.SMALL = load_font(int(_BASE_FONT_SIZES['SMALL'] * _CURRENT_SCALE))
+    FONTS.BOLD_SMALL = load_font(int(_BASE_FONT_SIZES['BOLD_SMALL'] * _CURRENT_SCALE), True)
+
+
+def reset_scale() -> None:
+    """Reset scale to 1x (base)."""
+    set_scale(1.0)
+
+
+def get_scale() -> float:
+    return _CURRENT_SCALE

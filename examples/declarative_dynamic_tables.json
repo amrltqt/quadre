@@ -1,4 +1,5 @@
 {
+  "canvas": { "height": "auto", "min_height": 1280, "max_height": 8000 },
   "data": {
     "header": {
       "title": "Dynamic Tables Demo",
@@ -45,7 +46,7 @@
   "layout": [
     {
       "type": "title",
-      "data_ref": "header"
+      "data_ref": "$.header"
     },
     {
       "type": "text",
@@ -59,7 +60,8 @@
     },
     {
       "type": "table",
-      "data_ref": "sales_table"
+      "data_ref": "$.sales_table",
+      "properties": { "fill_height": true, "height": 420 }
     },
     {
       "type": "spacer",
@@ -85,7 +87,8 @@
             },
             {
               "type": "table",
-              "data_ref": "team_table"
+              "data_ref": "$.team_table",
+              "properties": { "fill_height": true, "height": 330 }
             }
           ]
         },
@@ -105,7 +108,8 @@
             },
             {
               "type": "table",
-              "data_ref": "simple_metrics"
+              "data_ref": "$.simple_metrics",
+              "properties": { "fill_height": true, "height": 330 }
             }
           ]
         }
@@ -127,7 +131,8 @@
     },
     {
       "type": "table",
-      "data_ref": "comparison_table"
+      "data_ref": "$.comparison_table",
+      "properties": { "fill_remaining": true, "fill_height": true, "fit": "shrink", "min_row_height": 22, "shrink_row_height_floor": 14 }
     },
     {
       "type": "spacer",
@@ -135,7 +140,7 @@
     },
     {
       "type": "text",
-      "data_ref": "performance_summary",
+      "data_ref": "$.performance_summary",
       "properties": {
         "font": "body",
         "color": "#64748b",

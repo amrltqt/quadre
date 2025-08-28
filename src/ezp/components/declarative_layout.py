@@ -66,44 +66,54 @@ class DeclarativeLayoutManager:
         """
         Resolve a data reference to actual data.
 
-        Args:
-            ref: Data reference (key string, index, or list of refs)
-
-        Returns:
-            The referenced data
+        Supports both legacy dot/index style (e.g., "kpis.0") and
+        JSONPath-like style with root and brackets (e.g., "$.kpis[0].value").
         """
         if ref is None:
             return None
 
-        # Handle list of references
+        # List of references: resolve each
         if isinstance(ref, list):
             return [self.resolve_data_reference(r) for r in ref]
 
-        # Handle string key reference
-        if isinstance(ref, str):
-            # Support dot notation like "top_kpis.0" or "sections.performance"
-            keys = ref.split('.')
-            current = self.data_context
+        # Integer reference: legacy shorthand for top_kpis[ref]
+        if isinstance(ref, int):
+            kpis = self.data_context.get('top_kpis', [])
+            return kpis[ref] if 0 <= ref < len(kpis) else None
 
-            for key in keys:
+        # String references
+        if isinstance(ref, str):
+            s = ref.strip()
+
+            # JSONPath-like: starts with '$' and supports [idx]
+            if s.startswith('$'):
+                from ..flex.engine import resolve_path as _resolve
+                return _resolve(s, self.data_context)
+
+            # Legacy: dot navigation, numeric token means list index
+            current: Any = self.data_context
+            for token in s.split('.') if s else []:
                 if isinstance(current, dict):
-                    current = current.get(key)
+                    # Handle token like key[3]
+                    if '[' in token and token.endswith(']'):
+                        key, idx_str = token[:-1].split('[', 1)
+                        current = current.get(key)
+                        if not isinstance(current, list):
+                            return None
+                        try:
+                            current = current[int(idx_str)]
+                        except (ValueError, IndexError):
+                            return None
+                    else:
+                        current = current.get(token)
                 elif isinstance(current, list):
                     try:
-                        current = current[int(key)]
+                        current = current[int(token)]
                     except (ValueError, IndexError):
                         return None
                 else:
                     return None
-
             return current
-
-        # Handle integer index reference
-        if isinstance(ref, int):
-            # Default to top_kpis if available
-            kpis = self.data_context.get('top_kpis', [])
-            if 0 <= ref < len(kpis):
-                return kpis[ref]
 
         return None
 
@@ -189,18 +199,75 @@ class DeclarativeLayoutManager:
         if not table_data:
             return y + (height or 200)
 
+        fill_height = component.properties.get("fill_height", False)
+        min_row_h = component.properties.get("min_row_height", 28)
+        target_height = component.properties.get("height")  # when set, fill/truncate within this height
+        max_rows_prop = component.properties.get("max_rows")
+        fill_remaining = component.properties.get("fill_remaining", False)
+        if fill_remaining and not target_height:
+            # Compute remaining space to bottom of page
+            target_height = DIMENSIONS.HEIGHT - y - self.padding
+            if target_height < 0:
+                target_height = 0
+
         # Handle new structure with headers + rows
         if isinstance(table_data, dict):
             headers = table_data.get("headers", [])
             rows = table_data.get("rows", [])
             if headers and rows:
                 table = self._create_dynamic_table(headers, rows, width)
-                return table.render(draw, x, y, width)
+                fit = component.properties.get("fit", "truncate")
+                shrink_floor = int(component.properties.get("shrink_row_height_floor", 14))
+                # Optional explicit max rows
+                if max_rows_prop is not None and isinstance(max_rows_prop, int):
+                    table.rows = rows[:max(0, max_rows_prop)]
+                    rows = table.rows
+
+                if fill_height and target_height:
+                    header_h = table.header_height
+                    space = max(0, int(target_height) - header_h - 20)
+                    if len(rows) > 0:
+                        ideal = space / len(rows)
+                        if ideal >= min_row_h:
+                            table.row_height = int(ideal)
+                        else:
+                            if fit == "shrink":
+                                table.row_height = max(shrink_floor, int(ideal) if space > 0 else shrink_floor)
+                            else:
+                                max_rows_fit = max(1, space // min_row_h) if space > 0 else 0
+                                table.rows = rows[:max_rows_fit]
+                                table.row_height = max(min_row_h, int(space / max_rows_fit)) if max_rows_fit > 0 else min_row_h
+                    table.total_height = header_h + len(table.rows) * table.row_height + 20
+                table_height = table.render(draw, x, y, width)
+                return y + table_height
 
         # Fallback: old structure (list of lists)
         elif isinstance(table_data, list) and table_data:
             table = create_platform_table(table_data)
-            return table.render(draw, x, y, width)
+            fit = component.properties.get("fit", "truncate")
+            shrink_floor = int(component.properties.get("shrink_row_height_floor", 14))
+            # Optional explicit max rows
+            if max_rows_prop is not None and isinstance(max_rows_prop, int):
+                table.rows = table.rows[:max(0, max_rows_prop)]
+
+            if fill_height and target_height:
+                header_h = table.header_height
+                rows = table.rows
+                space = max(0, int(target_height) - header_h - 20)
+                if len(rows) > 0:
+                    ideal = space / len(rows)
+                    if ideal >= min_row_h:
+                        table.row_height = int(ideal)
+                    else:
+                        if fit == "shrink":
+                            table.row_height = max(shrink_floor, int(ideal) if space > 0 else shrink_floor)
+                        else:
+                            max_rows_fit = max(1, space // min_row_h) if space > 0 else 0
+                            table.rows = rows[:max_rows_fit]
+                            table.row_height = max(min_row_h, int(space / max_rows_fit)) if max_rows_fit > 0 else min_row_h
+                table.total_height = header_h + len(table.rows) * table.row_height + 20
+            table_height = table.render(draw, x, y, width)
+            return y + table_height
 
         return y + (height or 200)
 

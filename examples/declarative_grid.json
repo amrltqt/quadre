@@ -1,4 +1,5 @@
 {
+  "canvas": { "height": "auto" },
   "data": {
     "header": {
       "title": "Grid Layout Demo",
@@ -16,18 +17,18 @@
   "layout": [
     {
       "type": "title",
-      "data_ref": "header"
+      "data_ref": "$.header"
     },
     {
       "type": "grid",
       "properties": { "columns": 3, "gap": 20 },
       "children": [
-        { "type": "kpi_card", "data_ref": "quarterly_kpis.0" },
-        { "type": "kpi_card", "data_ref": "quarterly_kpis.1" },
-        { "type": "kpi_card", "data_ref": "quarterly_kpis.2" },
-        { "type": "kpi_card", "data_ref": "quarterly_kpis.3" },
-        { "type": "kpi_card", "data_ref": "quarterly_kpis.4" },
-        { "type": "kpi_card", "data_ref": "quarterly_kpis.5" }
+        { "type": "kpi_card", "data_ref": "$.quarterly_kpis[0]" },
+        { "type": "kpi_card", "data_ref": "$.quarterly_kpis[1]" },
+        { "type": "kpi_card", "data_ref": "$.quarterly_kpis[2]" },
+        { "type": "kpi_card", "data_ref": "$.quarterly_kpis[3]" },
+        { "type": "kpi_card", "data_ref": "$.quarterly_kpis[4]" },
+        { "type": "kpi_card", "data_ref": "$.quarterly_kpis[5]" }
       ]
     }
   ]

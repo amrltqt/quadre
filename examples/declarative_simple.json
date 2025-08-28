@@ -1,4 +1,5 @@
 {
+  "canvas": { "height": "auto" },
   "data": {
     "header": {
       "title": "Declarative Layout Demo - Simple",
@@ -14,16 +15,16 @@
   "layout": [
     {
       "type": "title",
-      "data_ref": "header"
+      "data_ref": "$.header"
     },
     {
       "type": "row",
       "properties": { "gap": 20 },
       "children": [
-        { "type": "kpi_card", "data_ref": "kpis.0" },
-        { "type": "kpi_card", "data_ref": "kpis.1" },
-        { "type": "kpi_card", "data_ref": "kpis.2" },
-        { "type": "kpi_card", "data_ref": "kpis.3" }
+        { "type": "kpi_card", "data_ref": "$.kpis[0]" },
+        { "type": "kpi_card", "data_ref": "$.kpis[1]" },
+        { "type": "kpi_card", "data_ref": "$.kpis[2]" },
+        { "type": "kpi_card", "data_ref": "$.kpis[3]" }
       ]
     }
   ]

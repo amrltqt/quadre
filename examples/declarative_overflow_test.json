@@ -1,4 +1,5 @@
 {
+  "canvas": { "height": "auto" },
   "data": {
     "header": {
       "title": "Layout Overflow Test Dashboard",
@@ -37,7 +38,7 @@
   "layout": [
     {
       "type": "title",
-      "data_ref": "header"
+      "data_ref": "$.header"
     },
     {
       "type": "text",
@@ -53,10 +54,10 @@
       "type": "row",
       "properties": { "gap": 15 },
       "children": [
-        { "type": "kpi_card", "data_ref": "problematic_kpis.0" },
-        { "type": "kpi_card", "data_ref": "problematic_kpis.1" },
-        { "type": "kpi_card", "data_ref": "problematic_kpis.2" },
-        { "type": "kpi_card", "data_ref": "problematic_kpis.3" }
+        { "type": "kpi_card", "data_ref": "$.problematic_kpis[0]" },
+        { "type": "kpi_card", "data_ref": "$.problematic_kpis[1]" },
+        { "type": "kpi_card", "data_ref": "$.problematic_kpis[2]" },
+        { "type": "kpi_card", "data_ref": "$.problematic_kpis[3]" }
       ]
     },
     {
@@ -75,7 +76,7 @@
     },
     {
       "type": "text",
-      "data_ref": "very_long_text",
+      "data_ref": "$.very_long_text",
       "properties": {
         "font": "body",
         "color": "#64748b",
@@ -85,7 +86,7 @@
     },
     {
       "type": "text",
-      "data_ref": "short_text",
+      "data_ref": "$.short_text",
       "properties": {
         "font": "body",
         "color": "#64748b",
@@ -105,7 +106,7 @@
     },
     {
       "type": "table",
-      "data_ref": "platform_table"
+      "data_ref": "$.platform_table"
     }
   ]
 }
