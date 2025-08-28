@@ -8,10 +8,18 @@ version = "0.1.0"
 description = "A Python CLI tool that generates beautiful dashboard images from JSON data using PIL/Pillow"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = ["pillow>=11.3.0"]
+dependencies = [
+    "pillow>=11.3.0",
+    "pytest>=8.4.1",
+]
 
 [project.scripts]
 ez-pillow = "ezp.main:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/ezp"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+]

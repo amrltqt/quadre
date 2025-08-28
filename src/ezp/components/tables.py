@@ -185,12 +185,15 @@ class EnhancedTable:
         current_y = y
 
         for row_index, row in enumerate(self.rows):
-            # Draw alternating row background
-            if self.style.use_alternating_rows and row_index % 2 == 1:
-                draw.rectangle(
-                    (x + 2, current_y - 5, x + width - 2, current_y + self.row_height - 10),
-                    fill=self.style.alt_row_background
-                )
+            # Draw alternating row background (guard against very small row heights)
+            if self.style.use_alternating_rows and row_index % 2 == 1 and self.row_height > 5:
+                top = current_y - 5
+                bottom = current_y + self.row_height - 10
+                if bottom >= top:
+                    draw.rectangle(
+                        (x + 2, top, x + width - 2, bottom),
+                        fill=self.style.alt_row_background
+                    )
 
             # Render cells in this row
             self._render_row_cells(draw, row, x + self.style.padding, current_y)
