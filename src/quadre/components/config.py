@@ -1,5 +1,5 @@
 """
-Configuration module for NADA dashboard components.
+Configuration module for quadre dashboard components.
 
 Contains all shared configuration including colors, fonts, and dimensions.
 """
@@ -175,7 +175,7 @@ def load_font(size: int, bold: bool = False) -> ImageFont.ImageFont:
                 continue
 
     # Optional: allow env override as a last resort (silent if missing)
-    custom_font_path = os.environ.get("nada_FONT_PATH")
+    custom_font_path = os.environ.get("quadre_FONT_PATH")
     if custom_font_path and os.path.exists(custom_font_path):
         try:
             return ImageFont.truetype(

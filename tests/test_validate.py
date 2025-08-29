@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from nada.validator import validate_layout
+from quadre.validator import validate_layout
 
 
 def test_validate_ok_dynamic_tables_example(tmp_path):

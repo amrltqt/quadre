@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from nada.utils.dataref import resolve_path
+from quadre.utils.dataref import resolve_path
 
 
 def test_resolve_path_basic_and_indexing():

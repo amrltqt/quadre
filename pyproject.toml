@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 
 [project]
-name = "nada"
+name = "quadre"
 version = "0.1.0"
 description = "A Python CLI tool that generates beautiful dashboard images from JSON data using PIL/Pillow"
 readme = "README.md"
@@ -13,12 +13,12 @@ dependencies = [ "pillow>=11.3.0", "pydantic>=2.7,<3" ]
 
 
 [project.scripts]
-nada = "nada.__main__:main"
-nada-validate = "nada.validator:main"
+quadre = "quadre.__main__:main"
+quadre-validate = "quadre.validator:main"
 
 
 [tool.hatch.build.targets.wheel]
-packages = [ "src/ndata" ]
+packages = [ "src/quadre" ]
 
 
 [dependency-groups]

@@ -3,20 +3,20 @@
 Fastest way to render an example (no install, using uv):
 
 ```bash
-uv run -m nada.main examples/declarative_featured.json out/featured.png
+uv run -m quadre.main examples/declarative_featured.json out/featured.png
 ```
 
 Validate a JSON document with the built‑in schema:
 
 ```bash
-uv run -m nada.validator examples/declarative_featured.json
+uv run -m quadre.validator examples/declarative_featured.json
 ```
 
 Using the installed CLI:
 
 ```bash
-nada render examples/declarative_featured.json out.png
-nada validate examples/declarative_featured.json
+quadre render examples/declarative_featured.json out.png
+quadre validate examples/declarative_featured.json
 ```
 
 Docker (reproducible environment):

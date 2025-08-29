@@ -19,4 +19,4 @@ COPY . /app
 # installe les deps dans .venv avec uv
 RUN uv sync --frozen --no-dev
 
-ENTRYPOINT ["uv", "run", "-m", "nada.main"]
+ENTRYPOINT ["uv", "run", "-m", "quadre.main"]

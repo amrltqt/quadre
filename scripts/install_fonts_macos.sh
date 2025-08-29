@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# NADA Font Installation Script for macOS
-# This script installs recommended fonts for the NADA dashboard renderer
+# quadre Font Installation Script for macOS
+# This script installs recommended fonts for the quadre dashboard renderer
 
 set -e
 
-echo "🔤 NADA Font Installation for macOS"
+echo "🔤 quadre Font Installation for macOS"
 echo "========================================"
 echo
 
@@ -116,7 +116,7 @@ search_paths=(
     "$HOME/Library/Fonts"
 )
 
-# Look for DejaVu Sans specifically (recommended for NADA)
+# Look for DejaVu Sans specifically (recommended for quadre)
 dejavu_paths=(
     "/Library/Fonts/DejaVuSans.ttf"
     "/usr/local/share/fonts/DejaVuSans.ttf"
@@ -166,24 +166,24 @@ if [[ -n "$recommended_font" ]]; then
         "$HOME/.bashrc"
     )
 
-    env_line="export nada_FONT_PATH=\"$recommended_font\""
+    env_line="export quadre_FONT_PATH=\"$recommended_font\""
 
     for config_file in "${shell_configs[@]}"; do
         if [[ -f "$config_file" ]]; then
-            if ! grep -q "nada_FONT_PATH" "$config_file"; then
+            if ! grep -q "quadre_FONT_PATH" "$config_file"; then
                 echo "" >> "$config_file"
-                echo "# NADA Font Configuration" >> "$config_file"
+                echo "# quadre Font Configuration" >> "$config_file"
                 echo "$env_line" >> "$config_file"
-                print_status "Added nada_FONT_PATH to $config_file"
+                print_status "Added quadre_FONT_PATH to $config_file"
             else
-                print_info "nada_FONT_PATH already exists in $config_file"
+                print_info "quadre_FONT_PATH already exists in $config_file"
             fi
         fi
     done
 
     # Set for current session
-    export nada_FONT_PATH="$recommended_font"
-    print_status "nada_FONT_PATH set to: $recommended_font"
+    export quadre_FONT_PATH="$recommended_font"
+    print_status "quadre_FONT_PATH set to: $recommended_font"
 
 else
     print_warning "No recommended font found. Using system defaults."
@@ -199,7 +199,7 @@ import sys
 import os
 sys.path.append('src')
 try:
-    from nada.components.config import load_font
+    from quadre.components.config import load_font
     font = load_font(24)
     font_path = getattr(font, 'path', 'Default PIL font')
     print(f"✓ Font loaded successfully: {font_path}")
@@ -222,17 +222,17 @@ echo
 print_info "To use the fonts immediately, restart your terminal or run:"
 echo "  source ~/.zshrc  # or ~/.bash_profile"
 echo
-print_info "To test NADA with the new fonts:"
+print_info "To test quadre with the new fonts:"
 echo "  cd ez-pillow"
 echo "  python utils/font_diagnostic.py"
 echo
 print_info "To generate a dashboard:"
-echo "  uv run -m nada.main data.json out/dashboard.png"
+echo "  uv run -m quadre.main data.json out/dashboard.png"
 
 if [[ -n "$recommended_font" ]]; then
     echo
     print_status "Recommended font configured: $(basename "$recommended_font")"
-    echo "Environment variable nada_FONT_PATH is set and ready to use."
+    echo "Environment variable quadre_FONT_PATH is set and ready to use."
 fi
 
 echo

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Font Diagnostic Tool for NADA
+Font Diagnostic Tool for quadre
 
 This utility helps diagnose font availability on different systems and provides
 guidance for font configuration using environment variables.
@@ -94,7 +94,7 @@ def test_font_loading(font_path, sizes=[12, 18, 24]):
 
 
 def find_recommended_fonts():
-    """Find recommended fonts for NADA."""
+    """Find recommended fonts for quadre."""
     system = platform.system()
 
     if system == "Darwin":  # macOS
@@ -143,14 +143,14 @@ def find_recommended_fonts():
 
 
 def test_ez_pillow_font_loading():
-    """Test the NADA font loading function (same API)."""
+    """Test the quadre font loading function (same API)."""
     try:
         # Add src to path
         script_dir = os.path.dirname(os.path.abspath(__file__))
         src_dir = os.path.join(script_dir, "..", "src")
         sys.path.insert(0, src_dir)
 
-        from nada.components.config import load_font
+        from quadre.components.config import load_font
 
         sizes = [20, 24, 30, 36, 42]
         results = {}
@@ -165,7 +165,7 @@ def test_ez_pillow_font_loading():
 
         return results
     except ImportError as e:
-        return {"error": f"Could not import NADA config: {e}"}
+        return {"error": f"Could not import quadre config: {e}"}
 
 
 def create_font_test_image(font_path, output_path="font_test.png"):
@@ -224,7 +224,7 @@ macOS Font Installation Guide:
    - Copy .ttf files to ~/Library/Fonts/ or /Library/Fonts/
 
 4. Set custom font path (recommended):
-   export nada_FONT_PATH="/Library/Fonts/DejaVuSans.ttf"
+   export quadre_FONT_PATH="/Library/Fonts/DejaVuSans.ttf"
    # Add to your ~/.zshrc or ~/.bash_profile
 """
     elif system == "Windows":
@@ -238,7 +238,7 @@ Windows Font Installation Guide:
 4. Or copy to C:/Windows/Fonts/
 
 5. Set custom font path in environment variables:
-   set nada_FONT_PATH=C:/Windows/Fonts/DejaVuSans.ttf
+   set quadre_FONT_PATH=C:/Windows/Fonts/DejaVuSans.ttf
 """
     else:  # Linux
         return """
@@ -261,13 +261,13 @@ Manual installation:
 3. Run: fc-cache -fv
 
 Set custom font path:
-export nada_FONT_PATH="/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+export quadre_FONT_PATH="/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 """
 
 
 def main():
     """Main diagnostic function."""
-    print("NADA Font Diagnostic Tool")
+    print("quadre Font Diagnostic Tool")
     print("=" * 50)
     print()
 
@@ -280,15 +280,15 @@ def main():
 
     # Environment variables
     print("Environment Variables:")
-    custom_font = os.environ.get("nada_FONT_PATH")
+    custom_font = os.environ.get("quadre_FONT_PATH")
     if custom_font:
-        print(f"  nada_FONT_PATH: {custom_font}")
+        print(f"  quadre_FONT_PATH: {custom_font}")
         if os.path.exists(custom_font):
             print("  ✓ Custom font path exists")
         else:
             print("  ✗ Custom font path does not exist")
     else:
-        print("  nada_FONT_PATH: Not set")
+        print("  quadre_FONT_PATH: Not set")
     print()
 
     # Font directories
@@ -313,8 +313,8 @@ def main():
         print("  ✗ No recommended fonts found")
     print()
 
-    # Test NADA font loading
-    print("NADA Font Loading Test:")
+    # Test quadre font loading
+    print("quadre Font Loading Test:")
     ez_results = test_ez_pillow_font_loading()
     if "error" in ez_results:
         print(f"  ✗ {ez_results['error']}")
@@ -358,13 +358,15 @@ def main():
         print("  ✓ Custom font path is configured and working")
     elif recommended:
         best_font_path = list(recommended.values())[0]
-        print(f"  → Set environment variable: export nada_FONT_PATH='{best_font_path}'")
+        print(
+            f"  → Set environment variable: export quadre_FONT_PATH='{best_font_path}'"
+        )
     else:
         print("  → Install recommended fonts for your system")
         print("  → Use the installation guide above")
 
     print(
-        '  → Test font loading with: python -c "from nada.components.config import load_font; print(load_font(24))"'
+        '  → Test font loading with: python -c "from quadre.components.config import load_font; print(load_font(24))"'
     )
 
 

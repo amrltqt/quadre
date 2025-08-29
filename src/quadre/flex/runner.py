@@ -13,16 +13,16 @@ from ..theme import (
 )
 from .defaults import set_widget_defaults
 from .adapter import build_layout_from_declarative
+from ..plugins import dispatch_outputs
 
 
-def render_dashboard_with_flex(
-    data: Dict[str, Any], out_path: str = "dashboard.png"
-) -> str:
+def build_dashboard_image(data: Dict[str, Any]) -> Image.Image:
     """
-    Render with effectively unconstrained height then crop to the final canvas.
+    Build and return the final rendered dashboard image (Pillow Image).
 
-    This avoids per-widget truncation/shrink decisions by letting content lay out
-    naturally, and clipping at the end. Protects memory with a sane max height.
+    Notes:
+    - Applies theme and scaling and restores global scale after rendering
+    - Does NOT save to disk; callers decide how to persist the image
     """
     # Capture base width/height before scaling
     base_W, base_H = DIMENSIONS.WIDTH, DIMENSIONS.HEIGHT
@@ -57,7 +57,7 @@ def render_dashboard_with_flex(
         int(canvas_cfg.get("min_height", H_default)) if auto_height else H_default
     )
 
-    # Load validated theme (env var NADA_THEME or bundled default), then allow doc-level overrides
+    # Load validated theme (env var quadre_THEME or bundled default), then allow doc-level overrides
     base_theme = load_theme_from_env_or_default()
     apply_theme(as_apply_theme_dict(base_theme))
     # Expose per-widget defaults from theme to the flex defaults provider
@@ -93,21 +93,22 @@ def render_dashboard_with_flex(
     # Measure preferred height with a huge available height (scaled)
     probe_img = Image.new("RGB", (W, 10), COLORS.BACKGROUND)
     probe_draw = ImageDraw.Draw(probe_img)
-    setattr(probe_draw, "_nada_image", probe_img)
+    setattr(probe_draw, "_quadre_image", probe_img)
     _, preferred_h = root.measure(probe_draw, W, 10_000_000)
 
+    # Render to a final image object
     if auto_height:
         # Choose final height based on content within bounds
         final_h = max(min_auto_h, min(preferred_h, max_auto_h))
         img = Image.new("RGB", (W, final_h), COLORS.BACKGROUND)
         draw = ImageDraw.Draw(img)
-        setattr(draw, "_nada_image", img)
+        setattr(draw, "_quadre_image", img)
         root.render(draw, 0, 0, W, final_h)
         if scale != 1.0 and downscale:
             # Downsample to base size with high-quality filter
             target_h = max(int(final_h / scale), 1)
             img = img.resize((base_W, target_h), Image.LANCZOS)
-        img.save(out_path)
+        final_img = img
     else:
         # Cap offscreen height to avoid excessive memory usage
         H_page = fixed_height_override or H_default
@@ -117,14 +118,37 @@ def render_dashboard_with_flex(
         # Render to offscreen then crop to fixed page height
         off = Image.new("RGB", (W, off_h), COLORS.BACKGROUND)
         off_draw = ImageDraw.Draw(off)
-        setattr(off_draw, "_nada_image", off)
+        setattr(off_draw, "_quadre_image", off)
         root.render(off_draw, 0, 0, W, off_h)
 
         final = off.crop((0, 0, W, H_page)) if off_h != H_page else off
         if scale != 1.0 and downscale:
             final = final.resize((base_W, int(H_page / scale)), Image.LANCZOS)
-        final.save(out_path)
+        final_img = final
+
     # Always restore scale back to 1x for subsequent runs
     if scale and scale != 1.0:
         reset_scale()
+    return final_img
+
+
+def render_dashboard_with_flex(
+    data: Dict[str, Any], out_path: str = "dashboard.png"
+) -> str:
+    """
+    Render with effectively unconstrained height then crop to the final canvas.
+
+    This avoids per-widget truncation/shrink decisions by letting content lay out
+    naturally, and clipping at the end. Protects memory with a sane max height.
+
+    Output dispatch is handled via the plugin system. By default, a built-in
+    'file' plugin writes the image to `out_path` to preserve existing behavior.
+    Users may specify `output` or `outputs` in the document to send the image to
+    other destinations in addition to (or instead of) the file.
+    """
+    final_img = build_dashboard_image(data)
+    outputs_spec = (data.get("outputs") if isinstance(data, dict) else None) or (
+        data.get("output") if isinstance(data, dict) else None
+    )
+    dispatch_outputs(final_img, outputs_spec, default_path=out_path, doc=data)
     return out_path

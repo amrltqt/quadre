@@ -9,7 +9,7 @@ def force_default_fonts(monkeypatch):
 
     This avoids cross-platform font differences impacting rendering output.
     """
-    from nada.components.config import FONTS
+    from quadre.components.config import FONTS
 
     default = ImageFont.load_default()
     monkeypatch.setattr(FONTS, "H1", default, raising=False)

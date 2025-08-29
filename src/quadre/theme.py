@@ -1,15 +1,15 @@
 from __future__ import annotations
 
 """
-Theme system for NADA.
+Theme system for quadre.
 
 Provides a Pydantic-validated theme that controls:
 - Global colors and font sizes
 - Per-widget default properties (FlexContainer, TextWidget, TableWidget, Spacer)
 
 Load order:
-- If env var NADA_THEME points to a JSON file, load and validate it
-- Otherwise, load bundled default at src/nada/theme/theme.json
+- If env var quadre_THEME points to a JSON file, load and validate it
+- Otherwise, load bundled default at src/quadre/theme/theme.json
 
 Renderer integration:
 - The runner applies colors/fonts via components.config.apply_theme
@@ -29,32 +29,36 @@ from pydantic import BaseModel, Field, ConfigDict
 class ColorsModel(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
-    background: str = Field('#ffffff', description="Canvas background color")
-    card_background: str = Field('#ffffff', description="Card background color")
-    muted: str = Field('#f1f5f9', description="Muted background surfaces (e.g., header)")
+    background: str = Field("#ffffff", description="Canvas background color")
+    card_background: str = Field("#ffffff", description="Card background color")
+    muted: str = Field(
+        "#f1f5f9", description="Muted background surfaces (e.g., header)"
+    )
 
-    border: str = Field('#d1d5db', description="Neutral border color")
-    input: str = Field('#e2e8f0', description="Input border/fill color")
-    ring: str = Field('#3b82f6', description="Focus ring color")
+    border: str = Field("#d1d5db", description="Neutral border color")
+    input: str = Field("#e2e8f0", description="Input border/fill color")
+    ring: str = Field("#3b82f6", description="Focus ring color")
 
-    foreground: str = Field('#0f172a', description="Primary foreground text color")
-    muted_foreground: str = Field('#64748b', description="Muted text color")
+    foreground: str = Field("#0f172a", description="Primary foreground text color")
+    muted_foreground: str = Field("#64748b", description="Muted text color")
 
-    primary: str = Field('#0f172a', description="Primary brand color")
-    primary_foreground: str = Field('#f8fafc', description="On-primary text color")
+    primary: str = Field("#0f172a", description="Primary brand color")
+    primary_foreground: str = Field("#f8fafc", description="On-primary text color")
 
-    secondary: str = Field('#f1f5f9', description="Secondary surface color")
-    secondary_foreground: str = Field('#0f172a', description="On-secondary text color")
+    secondary: str = Field("#f1f5f9", description="Secondary surface color")
+    secondary_foreground: str = Field("#0f172a", description="On-secondary text color")
 
-    accent: str = Field('#f1f5f9', description="Accent surface color")
-    accent_foreground: str = Field('#0f172a', description="On-accent text color")
+    accent: str = Field("#f1f5f9", description="Accent surface color")
+    accent_foreground: str = Field("#0f172a", description="On-accent text color")
 
-    destructive: str = Field('#ef4444', description="Negative / error color")
-    destructive_foreground: str = Field('#f8fafc', description="On-destructive text color")
-    success: str = Field('#22c55e', description="Positive / success color")
-    success_foreground: str = Field('#f8fafc', description="On-success text color")
-    warning: str = Field('#eab308', description="Warning color")
-    warning_foreground: str = Field('#0f172a', description="On-warning text color")
+    destructive: str = Field("#ef4444", description="Negative / error color")
+    destructive_foreground: str = Field(
+        "#f8fafc", description="On-destructive text color"
+    )
+    success: str = Field("#22c55e", description="Positive / success color")
+    success_foreground: str = Field("#f8fafc", description="On-success text color")
+    warning: str = Field("#eab308", description="Warning color")
+    warning_foreground: str = Field("#0f172a", description="On-warning text color")
 
 
 class FontsModel(BaseModel):
@@ -73,13 +77,20 @@ class FlexContainerDefaults(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
     gap: int = Field(16, description="Gap between items (px)")
-    align_items: str = Field("stretch", description="Cross-axis alignment: start|center|end|stretch")
+    align_items: str = Field(
+        "stretch", description="Cross-axis alignment: start|center|end|stretch"
+    )
     justify_content: str = Field(
-        "start", description="Main-axis distribution: start|center|end|space-between|space-around|space-evenly"
+        "start",
+        description="Main-axis distribution: start|center|end|space-between|space-around|space-evenly",
     )
     padding: int = Field(0, description="Padding inside container (px)")
-    bg_fill: Optional[str] = Field(None, description="Background fill color token or hex")
-    bg_outline: Optional[str] = Field(None, description="Background outline color token or hex")
+    bg_fill: Optional[str] = Field(
+        None, description="Background fill color token or hex"
+    )
+    bg_outline: Optional[str] = Field(
+        None, description="Background outline color token or hex"
+    )
     bg_radius: int = Field(12, description="Background corner radius (px)")
 
 
@@ -88,17 +99,25 @@ class TextWidgetDefaults(BaseModel):
 
     fill: str = Field("FOREGROUND", description="Text color token or hex")
     align: str = Field("left", description="left|center|right")
-    font: str = Field("body", description="Font style: title|heading|body|caption|table")
+    font: str = Field(
+        "body", description="Font style: title|heading|body|caption|table"
+    )
 
 
 class TableWidgetDefaults(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
-    fill_height: bool = Field(False, description="Stretch rows to fill available height")
+    fill_height: bool = Field(
+        False, description="Stretch rows to fill available height"
+    )
     fit: str = Field("truncate", description="Row fit strategy: truncate|shrink")
-    min_row_height: int = Field(28, description="Minimum row height when truncating (px)")
+    min_row_height: int = Field(
+        28, description="Minimum row height when truncating (px)"
+    )
     max_row_height: int = Field(90, description="Maximum row height when filling (px)")
-    shrink_row_height_floor: int = Field(14, description="Lower bound for shrink strategy (px)")
+    shrink_row_height_floor: int = Field(
+        14, description="Lower bound for shrink strategy (px)"
+    )
 
 
 class SpacerDefaults(BaseModel):
@@ -119,9 +138,15 @@ class WidgetsModel(BaseModel):
 class ThemeModel(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
-    colors: ColorsModel = Field(default_factory=ColorsModel, description="Global color palette")
-    fonts: FontsModel = Field(default_factory=FontsModel, description="Global font sizes")
-    widgets: WidgetsModel = Field(default_factory=WidgetsModel, description="Per-widget default properties")
+    colors: ColorsModel = Field(
+        default_factory=ColorsModel, description="Global color palette"
+    )
+    fonts: FontsModel = Field(
+        default_factory=FontsModel, description="Global font sizes"
+    )
+    widgets: WidgetsModel = Field(
+        default_factory=WidgetsModel, description="Per-widget default properties"
+    )
 
 
 def _default_theme_path() -> Path:
@@ -138,16 +163,18 @@ def builtin_theme_path(name: str) -> Path:
 
 
 def load_theme_from_env_or_default() -> ThemeModel:
-    """Load theme from NADA_THEME path or the bundled default; fail hard on error.
+    """Load theme from quadre_THEME path or the bundled default; fail hard on error.
 
-    - If NADA_THEME is set, it must point to a readable JSON file matching ThemeModel.
+    - If quadre_THEME is set, it must point to a readable JSON file matching ThemeModel.
     - Otherwise, the bundled default theme must exist and be valid.
     """
-    env_path = os.environ.get("NADA_THEME")
+    env_path = os.environ.get("quadre_THEME")
     if env_path:
         candidate = Path(env_path)
         if not candidate.exists():
-            raise FileNotFoundError(f"NADA_THEME points to a missing file: {candidate}")
+            raise FileNotFoundError(
+                f"quadre_THEME points to a missing file: {candidate}"
+            )
     else:
         candidate = _default_theme_path()
         if not candidate.exists():

@@ -47,7 +47,7 @@ rebuild: ## No-cache build
 	$(DOCKER) buildx build --no-cache --platform $(PLATFORM) -t $(IMAGE):$(TAG) --progress=plain .
 
 .PHONY: validate
-validate: ## Validate JSON with nada-validate (mounted code, Python image)
+validate: ## Validate JSON with quadre-validate (mounted code, Python image)
 	@test -f "$(DATA)" || (echo "Error: DATA does not exist -> $(DATA)"; exit 1)
 	$(call _print,Validate $(DATA))
 	$(DOCKER) run --rm --platform $(PLATFORM) $(RUN_ARGS) \
@@ -55,7 +55,7 @@ validate: ## Validate JSON with nada-validate (mounted code, Python image)
 		-e PYTHONPATH=/work \
 		-v "$(abspath $(PWD))":/work:ro \
 		-v "$(abspath $(DATA))":/data.json:ro \
-		$(IMAGE):$(TAG) -m nada.validator /data.json
+		$(IMAGE):$(TAG) -m quadre.validator /data.json
 	$(call _print,Validation OK)
 
 .PHONY: run
@@ -95,7 +95,7 @@ shell-dev: ## Interactive shell with live code mounted (CWD=/work)
 		$(IMAGE):$(TAG)
 
 .PHONY: test
-test: ## Run unit tests + validate all examples (set nada_PIXELS=1 to include pixel tests)
+test: ## Run unit tests + validate all examples (set quadre_PIXELS=1 to include pixel tests)
 	uv run pytest -q
 	@echo "Validating all JSONs in examples/…"
 	@set -e; for f in $(shell ls examples/*.json); do \

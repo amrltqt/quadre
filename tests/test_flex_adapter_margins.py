@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from nada.flex.runner import build_layout_from_declarative
-from nada.flex.engine import FlexContainer, TextWidget
-from nada.flex.widgets import Spacer
+from quadre.flex.runner import build_layout_from_declarative
+from quadre.flex.engine import FlexContainer, TextWidget
+from quadre.flex.widgets import Spacer
 
 
 def _unwrap_first_container(root: FlexContainer) -> FlexContainer:

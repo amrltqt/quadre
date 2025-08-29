@@ -44,7 +44,7 @@ class ImageBlock:
         return (min(w, tw), min(h, th))
 
     def render(self, draw: ImageDraw.ImageDraw, x: int, y: int, w: int, h: int) -> None:
-        base_img: Optional[Image.Image] = getattr(draw, "_nada_image", None)
+        base_img: Optional[Image.Image] = getattr(draw, "_quadre_image", None)
         im = self._open()
         if not im or base_img is None:
             # Fallback placeholder

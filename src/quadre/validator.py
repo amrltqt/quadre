@@ -214,32 +214,56 @@ def _post_validate_content_vs_props(
     # warn on unknown properties (renderer may ignore them)
     allowed = {
         # container/layout styling
-        "gap", "align_items", "justify_content", "padding", "bg_radius", "bg_fill", "bg_outline",
+        "gap",
+        "align_items",
+        "justify_content",
+        "padding",
+        "bg_radius",
+        "bg_fill",
+        "bg_outline",
         # text styling
-        "font", "fill", "color", "align",
+        "font",
+        "fill",
+        "color",
+        "align",
         # image
-        "fit", "radius", "opacity",
+        "fit",
+        "radius",
+        "opacity",
         # progress
         "bar_height",
         # status badge
         "variant",
         # table options
-        "fill_height", "min_row_height", "max_row_height", "fit", "shrink_row_height_floor", "style",
+        "fill_height",
+        "min_row_height",
+        "max_row_height",
+        "fit",
+        "shrink_row_height_floor",
+        "style",
         # spacer
         "height",
         # grid
         "columns",
         # flow/layout hints for children
-        "width_ratio", "fill_remaining",
+        "width_ratio",
+        "fill_remaining",
         # sizing for column children
-        "margin_top", "margin_bottom",
+        "margin_top",
+        "margin_bottom",
     }
     for k in props.keys():
         lk = str(k).lower()
-        if lk not in allowed and lk not in {
-            # tolerances / legacy aliases possibly added in the future
-        }:
-            warnings.append(f"{path}: unknown property '{k}' may be ignored by renderer")
+        if (
+            lk not in allowed
+            and lk
+            not in {
+                # tolerances / legacy aliases possibly added in the future
+            }
+        ):
+            warnings.append(
+                f"{path}: unknown property '{k}' may be ignored by renderer"
+            )
 
 
 def validate_layout(doc: Dict[str, Any]) -> Tuple[List[str], List[str]]:
@@ -249,8 +273,10 @@ def validate_layout(doc: Dict[str, Any]) -> Tuple[List[str], List[str]]:
     # Legacy key scanner (defined once, reused pre/post parse)
     def scan_legacy(node: Any, path: str) -> None:
         if isinstance(node, dict):
-            if 'data_ref' in node:
-                errors.append(f"{path}: 'data_ref' is no longer supported; use explicit content fields")
+            if "data_ref" in node:
+                errors.append(
+                    f"{path}: 'data_ref' is no longer supported; use explicit content fields"
+                )
             for k, v in node.items():
                 scan_legacy(v, f"{path}.{k}" if path else k)
         elif isinstance(node, list):
@@ -258,7 +284,7 @@ def validate_layout(doc: Dict[str, Any]) -> Tuple[List[str], List[str]]:
                 scan_legacy(v, f"{path}[{i}]")
 
     # Pre-scan for legacy keys regardless of parse success
-    scan_legacy(doc.get('layout', []), 'layout')
+    scan_legacy(doc.get("layout", []), "layout")
 
     try:
         parsed = Document.model_validate(doc)
@@ -282,7 +308,7 @@ def validate_layout(doc: Dict[str, Any]) -> Tuple[List[str], List[str]]:
         )
 
     # Scan raw layout again post-parse for consistent reporting locations
-    scan_legacy(doc.get('layout', []), 'layout')
+    scan_legacy(doc.get("layout", []), "layout")
 
     ctx = parsed.data
 
@@ -294,8 +320,10 @@ def validate_layout(doc: Dict[str, Any]) -> Tuple[List[str], List[str]]:
             payload = comp.table
             headers = comp.headers
             rows = comp.rows
+
             def _is_dataref_like(v: Any) -> bool:
                 return isinstance(v, dict) and any(k in v for k in ("ref", "$ref", "$"))
+
             def _validate_dref(v: Any, field_path: str) -> None:
                 # v can be DataRef model or dict-like
                 ref_path = None
@@ -306,14 +334,18 @@ def validate_layout(doc: Dict[str, Any]) -> Tuple[List[str], List[str]]:
                 if ref_path is None:
                     return
                 if ctx is None:
-                    warnings.append(f"{field_path}: cannot validate DataRef target (missing top-level data)")
+                    warnings.append(
+                        f"{field_path}: cannot validate DataRef target (missing top-level data)"
+                    )
                     return
                 try:
                     resolved = resolve_path(ref_path, ctx)
                 except Exception:
                     resolved = None
                 if resolved is None:
-                    errors.append(f"{field_path}: DataRef '{ref_path}' does not resolve in 'data'")
+                    errors.append(
+                        f"{field_path}: DataRef '{ref_path}' does not resolve in 'data'"
+                    )
 
             if payload is not None:
                 if isinstance(payload, dict):
@@ -322,11 +354,15 @@ def validate_layout(doc: Dict[str, Any]) -> Tuple[List[str], List[str]]:
                     _validate_dref(h, f"{path}.table.headers")
                     _validate_dref(r, f"{path}.table.rows")
                     if not isinstance(h, list) or not isinstance(r, list):
-                        errors.append(f"{path}: table.headers must be a list, table.rows must be a list")
+                        errors.append(
+                            f"{path}: table.headers must be a list, table.rows must be a list"
+                        )
                     else:
                         for i, row in enumerate(r):
                             if not isinstance(row, list):
-                                errors.append(f"{path}: table rows must be lists (row {i})")
+                                errors.append(
+                                    f"{path}: table rows must be lists (row {i})"
+                                )
                 elif isinstance(payload, list):
                     for i, row in enumerate(payload):
                         if not isinstance(row, list):
@@ -334,27 +370,37 @@ def validate_layout(doc: Dict[str, Any]) -> Tuple[List[str], List[str]]:
                 elif _is_dataref_like(payload):
                     _validate_dref(payload, f"{path}.table")
                 else:
-                    errors.append(f"{path}: table payload must be dict with headers/rows, list-of-lists, or DataRef")
+                    errors.append(
+                        f"{path}: table payload must be dict with headers/rows, list-of-lists, or DataRef"
+                    )
             elif headers is not None or rows is not None:
                 h = headers or []
                 r = rows or []
                 _validate_dref(h, f"{path}.headers")
                 _validate_dref(r, f"{path}.rows")
                 if not isinstance(h, list) or not isinstance(r, list):
-                    errors.append(f"{path}: table.headers must be a list, table.rows must be a list")
+                    errors.append(
+                        f"{path}: table.headers must be a list, table.rows must be a list"
+                    )
                 else:
                     for i, row in enumerate(r):
                         if not isinstance(row, list):
                             errors.append(f"{path}: table rows must be lists (row {i})")
+
         # DataRef existence checks for other components
         def _validate_content(val: Any, field_path: str) -> None:
             if isinstance(val, DataRef):
                 if ctx is None:
-                    warnings.append(f"{field_path}: cannot validate DataRef target (missing top-level data)")
+                    warnings.append(
+                        f"{field_path}: cannot validate DataRef target (missing top-level data)"
+                    )
                     return
                 resolved = resolve_path(val.path, ctx)
                 if resolved is None:
-                    errors.append(f"{field_path}: DataRef '{val.path}' does not resolve in 'data'")
+                    errors.append(
+                        f"{field_path}: DataRef '{val.path}' does not resolve in 'data'"
+                    )
+
         if isinstance(comp, TitleComponent):
             _validate_content(comp.title, f"{path}.title")
             if comp.date_note is not None:
@@ -367,8 +413,10 @@ def validate_layout(doc: Dict[str, Any]) -> Tuple[List[str], List[str]]:
             # delta can be DataRef-like dict; best-effort check
             # (skip strict validation here if not DataRef model)
         # Forbid legacy data_ref entirely
-        if hasattr(comp, 'data_ref') and getattr(comp, 'data_ref') is not None:
-            errors.append(f"{path}: 'data_ref' is no longer supported; use explicit content fields")
+        if hasattr(comp, "data_ref") and getattr(comp, "data_ref") is not None:
+            errors.append(
+                f"{path}: 'data_ref' is no longer supported; use explicit content fields"
+            )
         if isinstance(comp, (RowComponent, ColumnComponent, GridComponent)):
             children = getattr(comp, "children", [])
             for i, ch in enumerate(children):
@@ -381,7 +429,9 @@ def validate_layout(doc: Dict[str, Any]) -> Tuple[List[str], List[str]]:
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Validate NADA declarative JSON document")
+    ap = argparse.ArgumentParser(
+        description="Validate quadre declarative JSON document"
+    )
     ap.add_argument("json_file", help="Path to JSON document to validate")
     args = ap.parse_args()
 

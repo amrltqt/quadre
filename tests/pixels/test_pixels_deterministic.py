@@ -7,7 +7,7 @@ import hashlib
 
 import pytest
 
-from nada.flex.runner import render_dashboard_with_flex
+from quadre.flex.runner import render_dashboard_with_flex
 
 
 pytestmark = pytest.mark.pixels
@@ -36,8 +36,8 @@ def save_baselines(file: Path, data: dict) -> None:
 
 
 @pytest.mark.skipif(
-    os.environ.get("nada_PIXELS") != "1",
-    reason="set nada_PIXELS=1 to enable pixel tests",
+    os.environ.get("quadre_PIXELS") != "1",
+    reason="set quadre_PIXELS=1 to enable pixel tests",
 )
 def test_pixels_kpi_row_deterministic(tmp_path: Path):
     # Minimal deterministic scenario (fonts forced by conftest fixture)
@@ -75,10 +75,10 @@ def test_pixels_kpi_row_deterministic(tmp_path: Path):
     baselines = load_baselines(baseline_file)
     key = "kpi_row_v1"
 
-    if os.environ.get("nada_RECORD") == "1":
+    if os.environ.get("quadre_RECORD") == "1":
         baselines[key] = digest
         save_baselines(baseline_file, baselines)
         pytest.skip("Recorded baseline; skipping assertion")
 
-    assert key in baselines, "Baseline missing — set nada_RECORD=1 to record"
+    assert key in baselines, "Baseline missing — set quadre_RECORD=1 to record"
     assert baselines[key] == digest, f"Pixel diff detected for {key}"

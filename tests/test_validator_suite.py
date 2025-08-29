@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from nada.validator import validate_layout
+from quadre.validator import validate_layout
 
 
 def _has_error(errors: list[str], snippet: str) -> bool:

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from nada.utils.dataref import resolve_field
+from quadre.utils.dataref import resolve_field
 
 
 def test_plain_string_is_literal():
@@ -36,5 +36,8 @@ def test_nested_dict_resolves_deep_values():
         "extra": {"label": ".u.name"},
     }
     out = resolve_field(doc, payload)
-    assert out == {"title": "Jane", "caption": "User profile", "extra": {"label": "Jane"}}
-
+    assert out == {
+        "title": "Jane",
+        "caption": "User profile",
+        "extra": {"label": "Jane"},
+    }

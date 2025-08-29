@@ -1,5 +1,5 @@
 """
-Basic drawing primitives for NADA dashboard components.
+Basic drawing primitives for quadre dashboard components.
 
 This module contains low-level drawing functions that are used by higher-level components.
 All primitives work with PIL ImageDraw objects and follow consistent styling patterns.
@@ -10,12 +10,14 @@ from typing import Tuple, Optional
 from .config import COLORS, FONTS, DIMENSIONS
 
 
-def rounded_rectangle(draw: ImageDraw.ImageDraw,
-                     xy: Tuple[int, int, int, int],
-                     radius: int,
-                     fill: str,
-                     outline: Optional[str] = None,
-                     width: int = 1) -> None:
+def rounded_rectangle(
+    draw: ImageDraw.ImageDraw,
+    xy: Tuple[int, int, int, int],
+    radius: int,
+    fill: str,
+    outline: Optional[str] = None,
+    width: int = 1,
+) -> None:
     """
     Draw a rounded rectangle with optional outline.
 
@@ -31,11 +33,13 @@ def rounded_rectangle(draw: ImageDraw.ImageDraw,
     draw.rounded_rectangle(xy, radius, fill=fill, outline=outline, width=width)
 
 
-def badge(draw: ImageDraw.ImageDraw,
-          xy: Tuple[int, int],
-          text: str,
-          variant: str = "default",
-          font: Optional[ImageFont.ImageFont] = None) -> Tuple[int, int]:
+def badge(
+    draw: ImageDraw.ImageDraw,
+    xy: Tuple[int, int],
+    text: str,
+    variant: str = "default",
+    font: Optional[ImageFont.ImageFont] = None,
+) -> Tuple[int, int]:
     """
     Draw a compact rounded badge.
 
@@ -74,7 +78,9 @@ def badge(draw: ImageDraw.ImageDraw,
     # Draw main badge
     badge_xy = (x, y, x + badge_width, y + badge_height)
     outline_color = COLORS.BORDER if variant == "outline" else None
-    draw.rounded_rectangle(badge_xy, radius, fill=fill_color, outline=outline_color, width=1)
+    draw.rounded_rectangle(
+        badge_xy, radius, fill=fill_color, outline=outline_color, width=1
+    )
 
     # Draw text centered vertically
     text_y = y + (badge_height - font.size) // 2
@@ -83,15 +89,17 @@ def badge(draw: ImageDraw.ImageDraw,
     return badge_width, badge_height
 
 
-def draw_percentage_text(draw: ImageDraw.ImageDraw,
-                        xy: Tuple[int, int],
-                        main_text: str,
-                        percentage: str,
-                        main_font: ImageFont.ImageFont,
-                        pct_font: ImageFont.ImageFont,
-                        main_color: str,
-                        pct_color: str,
-                        spacing: int = 5) -> int:
+def draw_percentage_text(
+    draw: ImageDraw.ImageDraw,
+    xy: Tuple[int, int],
+    main_text: str,
+    percentage: str,
+    main_font: ImageFont.ImageFont,
+    pct_font: ImageFont.ImageFont,
+    main_color: str,
+    pct_color: str,
+    spacing: int = 5,
+) -> int:
     """
     Draw main text followed by colored percentage in parentheses.
 

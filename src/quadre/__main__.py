@@ -18,13 +18,19 @@ def cmd_render(args: argparse.Namespace) -> int:
         if theme_arg.lower() in ("dark", "light", "default"):
             path = builtin_theme_path(theme_arg)
         else:
-            path = builtin_theme_path(theme_arg) if not ("/" in theme_arg or "\\" in theme_arg or theme_arg.endswith('.json')) else None
+            path = (
+                builtin_theme_path(theme_arg)
+                if not (
+                    "/" in theme_arg or "\\" in theme_arg or theme_arg.endswith(".json")
+                )
+                else None
+            )
             if path is None:
                 path = theme_arg  # treat as explicit path
         if not os.path.exists(str(path)):
             print(f"[ERROR] Theme not found: {path}")
             return 2
-        os.environ["NADA_THEME"] = str(path)
+        os.environ["quadre_THEME"] = str(path)
     with open(args.input, "r", encoding="utf-8") as f:
         doc = json.load(f)
 
@@ -62,16 +68,20 @@ def cmd_validate(args: argparse.Namespace) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        prog="nada",
-        description="NADA CLI (render | validate)",
+        prog="quadre",
+        description="quadre CLI (render | validate)",
     )
     sub = p.add_subparsers(dest="cmd", required=True)
 
     pr = sub.add_parser("render", help="Render JSON to PNG")
     pr.add_argument("input", help="Input JSON file")
-    pr.add_argument("output", nargs="?", default="dashboard.png", help="Output PNG file")
+    pr.add_argument(
+        "output", nargs="?", default="dashboard.png", help="Output PNG file"
+    )
     pr.add_argument("--no-validate", action="store_true", help="Skip JSON validation")
-    pr.add_argument("--theme", help="Theme to use: 'dark' | 'light' | path/to/theme.json")
+    pr.add_argument(
+        "--theme", help="Theme to use: 'dark' | 'light' | path/to/theme.json"
+    )
     pr.set_defaults(func=cmd_render)
 
     pv = sub.add_parser("validate", help="Validate JSON document")

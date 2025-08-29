@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-NADA — Not A Dashboard App (Main Entry Point)
+quadre — Not A Dashboard App (Main Entry Point)
 
 A Python CLI that generates static dashboard PNGs from JSON using Pillow.
 Built on a lightweight Flex layout engine with reusable components.
@@ -10,7 +10,9 @@ import argparse
 import json
 import sys
 
-from nada.flex.runner import render_dashboard_with_flex
+from quadre.flex.runner import render_dashboard_with_flex
+from quadre.flex.runner import build_dashboard_image
+from quadre.plugins import image_to_bytes
 
 
 def render_dashboard(data: dict, out_path: str = "dashboard.png") -> str:
@@ -28,6 +30,25 @@ def render_dashboard(data: dict, out_path: str = "dashboard.png") -> str:
     return render_dashboard_with_flex(data, out_path)
 
     # Legacy procedural renderer removed in favor of Flex for the default path.
+
+
+def render_dashboard_bytes(data: dict, format: str = "PNG") -> bytes:
+    """
+    Render the dashboard and return encoded image bytes (PNG by default).
+
+    This is a programmatic API that avoids writing to disk and is suitable for
+    piping the result to third-party systems. To change format, pass e.g.
+    format="WEBP" or "JPEG".
+
+    Args:
+        data: Dashboard data dictionary
+        format: Output encoding format (default: "PNG")
+
+    Returns:
+        Encoded image bytes
+    """
+    img = build_dashboard_image(data)
+    return image_to_bytes(img, format=format)
 
 
 def load_data_from_json(json_path: str) -> dict:
@@ -65,12 +86,12 @@ def main():
         epilog="""
 Examples:
   # Named arguments
-  uv run -m nada.main -i data.json
-  uv run -m nada.main -i data.json -o my_dashboard.png
-  uv run -m nada.main --input data.json --output result.png
+  uv run -m quadre.main -i data.json
+  uv run -m quadre.main -i data.json -o my_dashboard.png
+  uv run -m quadre.main --input data.json --output result.png
 
   # Positional arguments
-  uv run -m nada.main data.json output.png
+  uv run -m quadre.main data.json output.png
         """,
     )
 

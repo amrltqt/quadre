@@ -8,34 +8,34 @@ This repository generates dashboard images from JSON using Pillow (PIL). It expo
 
 ## Repo Map
 
-- `src/nada/main.py`: high‑level render entry (`render_dashboard`), CLI wiring via `ez-pillow`
-- `src/nada/__main__.py`: `nada` CLI (render/validate subcommands)
-- `src/nada/validator.py`: JSON schema + validation (Pydantic 2)
+- `src/quadre/main.py`: high‑level render entry (`render_dashboard`), CLI wiring via `ez-pillow`
+- `src/quadre/__main__.py`: `quadre` CLI (render/validate subcommands)
+- `src/quadre/validator.py`: JSON schema + validation (Pydantic 2)
 - Flex engine and renderer:
-  - `src/nada/flex/engine.py`: primitives (`Widget`, `TextWidget`, `FlexContainer`, `resolve_path`)
-  - `src/nada/flex/widgets.py`: higher‑level widgets (`KPIWidget`, `TableWidget`, `Spacer`)
-  - `src/nada/flex/runner.py`: render pipeline (`render_dashboard_with_flex`)
-  - `src/nada/flex/adapter.py`: declarative JSON → flex layout
-  - `src/nada/flex/builder_basic.py`: simple data‑driven layout
-  - `src/nada/flex/helpers.py`: shared helpers (defaults, text/table/spacer construction)
-  - `src/nada/flex/defaults.py`: theme-driven widget defaults and color parsing
-- `src/nada/theme.py`, `src/nada/theme/theme.json`: Pydantic theme and bundled defaults
-  - Dark theme available at `src/nada/theme/dark.json` (use with `NADA_THEME=src/nada/theme/dark.json`)
+  - `src/quadre/flex/engine.py`: primitives (`Widget`, `TextWidget`, `FlexContainer`, `resolve_path`)
+  - `src/quadre/flex/widgets.py`: higher‑level widgets (`KPIWidget`, `TableWidget`, `Spacer`)
+  - `src/quadre/flex/runner.py`: render pipeline (`render_dashboard_with_flex`)
+  - `src/quadre/flex/adapter.py`: declarative JSON → flex layout
+  - `src/quadre/flex/builder_basic.py`: simple data‑driven layout
+  - `src/quadre/flex/helpers.py`: shared helpers (defaults, text/table/spacer construction)
+  - `src/quadre/flex/defaults.py`: theme-driven widget defaults and color parsing
+- `src/quadre/theme.py`, `src/quadre/theme/theme.json`: Pydantic theme and bundled defaults
+  - Dark theme available at `src/quadre/theme/dark.json` (use with `quadre_THEME=src/quadre/theme/dark.json`)
 - Components (UI building blocks):
-  - `src/nada/components/config.py`: colors, fonts, dimensions, DPI/scale, theme application
-  - `src/nada/components/primitives.py`: low‑level drawing helpers
-  - `src/nada/components/cards.py`: KPI/section cards
-  - `src/nada/components/tables.py`: table engine (columns, cell types, styles)
+  - `src/quadre/components/config.py`: colors, fonts, dimensions, DPI/scale, theme application
+  - `src/quadre/components/primitives.py`: low‑level drawing helpers
+  - `src/quadre/components/cards.py`: KPI/section cards
+  - `src/quadre/components/tables.py`: table engine (columns, cell types, styles)
 - Tests: `tests/` (validation, rendering, pixels, adapter margins, resolve_path)
 - Examples: `examples/*.json`
 
 ## Entrypoints & Commands
 
 - Render via Python module:
-  - `uv run -m nada.main data.json out/dashboard.png`
+  - `uv run -m quadre.main data.json out/dashboard.png`
 - CLI wrappers (installed):
-  - `nada render examples/declarative_featured.json out.png`
-  - `nada validate examples/declarative_featured.json`
+  - `quadre render examples/declarative_featured.json out.png`
+  - `quadre validate examples/declarative_featured.json`
 - Make targets (Dockerized flow):
   - `make run examples/declarative_featured.json`
   - `make validate examples/declarative_featured.json`
@@ -44,13 +44,13 @@ This repository generates dashboard images from JSON using Pillow (PIL). It expo
 ## Run Locally
 
 - Python 3.12+ recommended (see `pyproject.toml`)
-- With uv (preferred): `uv run -m nada.main data.json out.png`
-- Or install package then run `nada`
+- With uv (preferred): `uv run -m quadre.main data.json out.png`
+- Or install package then run `quadre`
 
 ## Tests
 
 - Unit tests: `pytest -q` or `uv run pytest -q`
-- Pixel tests (opt‑in): set `nada_PIXELS=1` to enable; `nada_RECORD=1` to record baselines
+- Pixel tests (opt‑in): set `quadre_PIXELS=1` to enable; `quadre_RECORD=1` to record baselines
 - Determinism: tests patch fonts to `ImageFont.load_default()` via `tests/conftest.py`
 - New tests should follow existing patterns and avoid platform‑dependent assumptions
 
@@ -97,13 +97,13 @@ This repository generates dashboard images from JSON using Pillow (PIL). It expo
 ## Playbooks (How‑to)
 
 - Add a declarative type
-  1) Extend `build_layout_from_declarative` (`src/nada/flex/adapter.py`) in `build_node`
+  1) Extend `build_layout_from_declarative` (`src/quadre/flex/adapter.py`) in `build_node`
   2) Map `properties` via `_norm_props` and build the widget (or a `FlexContainer`)
   3) Add the prop to the validator whitelist if needed (`_post_validate_content_vs_props`)
   4) Test: unit tests + (optional) pixel tests
 
 - Add a Flex widget
-  1) Implement the class in `src/nada/flex/widgets.py` (inherits from `Widget`)
+  1) Implement the class in `src/quadre/flex/widgets.py` (inherits from `Widget`)
   2) Expose construction via `helpers` if reusable
   3) Integrate in the adapter if used by `layout`
 
@@ -127,7 +127,7 @@ This repository generates dashboard images from JSON using Pillow (PIL). It expo
 ## Troubleshooting
 
 - Non‑deterministic render: check fonts; use the test fixture; pick a common font via `apply_theme(fonts={...})`
-- Rejected JSON: run `nada validate` for explicit errors (DataRef, types, props)
+- Rejected JSON: run `quadre validate` for explicit errors (DataRef, types, props)
 - Clipped content: check `canvas.max_height/min_height` and `TableWidget.fill_height/fit`
 
 ## Roadmap (suggestions)

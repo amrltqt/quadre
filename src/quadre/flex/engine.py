@@ -1,5 +1,5 @@
 """
-Data binding utilities are provided by nada.utils.dataref.
+Data binding utilities are provided by quadre.utils.dataref.
 resolve_path is re-imported here for backward compatibility.
 """
 
@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from typing import List, Optional, Tuple
 
 from PIL import Image, ImageDraw, ImageFont
-from nada.components.config import load_emoji_font, load_cjk_font
+from quadre.components.config import load_emoji_font, load_cjk_font
 
 
 class Widget:

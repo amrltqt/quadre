@@ -1,5 +1,5 @@
 """
-Generic table components for NADA dashboards.
+Generic table components for quadre dashboards.
 
 This module contains flexible table-based UI components for displaying tabular data
 with customizable styling, cell renderers, and column configurations.
@@ -14,6 +14,7 @@ from .primitives import rounded_rectangle, draw_percentage_text
 
 class CellAlignment(Enum):
     """Cell content alignment options."""
+
     LEFT = "left"
     CENTER = "center"
     RIGHT = "right"
@@ -21,6 +22,7 @@ class CellAlignment(Enum):
 
 class CellType(Enum):
     """Cell content type for automatic formatting."""
+
     TEXT = "text"
     NUMBER = "number"
     PERCENTAGE = "percentage"
@@ -39,7 +41,7 @@ class ColumnDefinition:
         cell_type: CellType = CellType.TEXT,
         font: Optional[ImageFont.ImageFont] = None,
         color: Optional[str] = None,
-        renderer: Optional[Callable[[Any], str]] = None
+        renderer: Optional[Callable[[Any], str]] = None,
     ):
         """
         Initialize column definition.
@@ -75,7 +77,7 @@ class TableStyle:
         text_color: str = COLORS.FOREGROUND,
         header_text_color: str = COLORS.FOREGROUND,
         padding: int = 20,
-        use_alternating_rows: bool = True
+        use_alternating_rows: bool = True,
     ):
         """Initialize table style configuration."""
         self.background_color = background_color
@@ -107,7 +109,7 @@ class EnhancedTable:
         columns: List[ColumnDefinition],
         style: Optional[TableStyle] = None,
         header_height: Optional[int] = None,
-        row_height: Optional[int] = None
+        row_height: Optional[int] = None,
     ):
         """
         Initialize enhanced table.
@@ -141,8 +143,12 @@ class EnhancedTable:
         """
         # Draw main table container
         rounded_rectangle(
-            draw, (x, y, x + width, y + self.total_height), DIMENSIONS.CARD_RADIUS,
-            fill=self.style.background_color, outline=self.style.border_color, width=1
+            draw,
+            (x, y, x + width, y + self.total_height),
+            DIMENSIONS.CARD_RADIUS,
+            fill=self.style.background_color,
+            outline=self.style.border_color,
+            width=1,
         )
 
         # Draw header
@@ -153,7 +159,9 @@ class EnhancedTable:
 
         return self.total_height
 
-    def _render_header(self, draw: ImageDraw.ImageDraw, x: int, y: int, width: int) -> None:
+    def _render_header(
+        self, draw: ImageDraw.ImageDraw, x: int, y: int, width: int
+    ) -> None:
         """Render table header row."""
         # Header background (rounded at top)
         draw.rounded_rectangle(
@@ -173,8 +181,12 @@ class EnhancedTable:
         # Fill bottom part of header to make it rectangular at the bottom
         # (also hides the curved bottom outline just drawn)
         draw.rectangle(
-            (x, y + self.header_height - DIMENSIONS.CARD_RADIUS,
-             x + width, y + self.header_height),
+            (
+                x,
+                y + self.header_height - DIMENSIONS.CARD_RADIUS,
+                x + width,
+                y + self.header_height,
+            ),
             fill=self.style.header_background,
         )
 
@@ -191,26 +203,41 @@ class EnhancedTable:
             self._render_header_cell(draw, current_x, y + 15, column)
             current_x += column.width
 
-    def _render_header_cell(self, draw: ImageDraw.ImageDraw, x: int, y: int, column: ColumnDefinition) -> None:
+    def _render_header_cell(
+        self, draw: ImageDraw.ImageDraw, x: int, y: int, column: ColumnDefinition
+    ) -> None:
         """Render a single header cell."""
-        text_x = self._calculate_text_position(x, column.width, column.title, FONTS.BOLD_SMALL, column.alignment)
+        text_x = self._calculate_text_position(
+            x, column.width, column.title, FONTS.BOLD_SMALL, column.alignment
+        )
         # Center vertically in header
         text_y = y + (self.header_height - 40) // 2  # 40 is approximate font height
-        draw.text((text_x, text_y), column.title, font=FONTS.BOLD_SMALL, fill=self.style.header_text_color)
+        draw.text(
+            (text_x, text_y),
+            column.title,
+            font=FONTS.BOLD_SMALL,
+            fill=self.style.header_text_color,
+        )
 
-    def _render_data_rows(self, draw: ImageDraw.ImageDraw, x: int, y: int, width: int) -> None:
+    def _render_data_rows(
+        self, draw: ImageDraw.ImageDraw, x: int, y: int, width: int
+    ) -> None:
         """Render table data rows."""
         current_y = y
 
         for row_index, row in enumerate(self.rows):
             # Draw alternating row background (guard against very small row heights)
-            if self.style.use_alternating_rows and row_index % 2 == 1 and self.row_height > 5:
+            if (
+                self.style.use_alternating_rows
+                and row_index % 2 == 1
+                and self.row_height > 5
+            ):
                 top = current_y - 5
                 bottom = current_y + self.row_height - 10
                 if bottom >= top:
                     draw.rectangle(
                         (x + 2, top, x + width - 2, bottom),
-                        fill=self.style.alt_row_background
+                        fill=self.style.alt_row_background,
                     )
 
             # Render cells in this row
@@ -218,7 +245,9 @@ class EnhancedTable:
 
             current_y += self.row_height
 
-    def _render_row_cells(self, draw: ImageDraw.ImageDraw, row: List[str], start_x: int, y: int) -> None:
+    def _render_row_cells(
+        self, draw: ImageDraw.ImageDraw, row: List[str], start_x: int, y: int
+    ) -> None:
         """Render cells in a single row."""
         current_x = start_x
         # Center vertically in row
@@ -227,15 +256,23 @@ class EnhancedTable:
         for col_index, (cell_value, column) in enumerate(zip(row, self.columns)):
             if column.renderer:
                 # Use custom renderer
-                column.renderer(draw, current_x, cell_y, column.width, cell_value, column)
+                column.renderer(
+                    draw, current_x, cell_y, column.width, cell_value, column
+                )
             else:
                 # Use default renderer based on cell type
                 self._render_cell_by_type(draw, current_x, cell_y, column, cell_value)
 
             current_x += column.width
 
-    def _render_cell_by_type(self, draw: ImageDraw.ImageDraw, x: int, y: int,
-                           column: ColumnDefinition, cell_value: str) -> None:
+    def _render_cell_by_type(
+        self,
+        draw: ImageDraw.ImageDraw,
+        x: int,
+        y: int,
+        column: ColumnDefinition,
+        cell_value: str,
+    ) -> None:
         """Render cell based on its type configuration."""
         if column.cell_type == CellType.PERCENTAGE and self._has_percentage(cell_value):
             self._render_percentage_cell(draw, cell_value, x, y, column)
@@ -247,35 +284,65 @@ class EnhancedTable:
             # Default text rendering
             self._render_text_cell(draw, cell_value, x, y, column)
 
-    def _render_text_cell(self, draw: ImageDraw.ImageDraw, cell_value: str,
-                         x: int, y: int, column: ColumnDefinition) -> None:
+    def _render_text_cell(
+        self,
+        draw: ImageDraw.ImageDraw,
+        cell_value: str,
+        x: int,
+        y: int,
+        column: ColumnDefinition,
+    ) -> None:
         """Render a regular text cell."""
         # Truncate text to fit in column width
         max_width = column.width - 20  # Leave padding
         truncated_text = self._truncate_text(cell_value, column.font, max_width)
-        text_x = self._calculate_text_position(x, column.width, truncated_text, column.font, column.alignment)
+        text_x = self._calculate_text_position(
+            x, column.width, truncated_text, column.font, column.alignment
+        )
         draw.text((text_x, y), truncated_text, font=column.font, fill=column.color)
 
-    def _render_bold_cell(self, draw: ImageDraw.ImageDraw, cell_value: str,
-                         x: int, y: int, column: ColumnDefinition) -> None:
+    def _render_bold_cell(
+        self,
+        draw: ImageDraw.ImageDraw,
+        cell_value: str,
+        x: int,
+        y: int,
+        column: ColumnDefinition,
+    ) -> None:
         """Render a bold text cell."""
         # Truncate text to fit in column width
         max_width = column.width - 20  # Leave padding
         truncated_text = self._truncate_text(cell_value, FONTS.BOLD_SMALL, max_width)
-        text_x = self._calculate_text_position(x, column.width, truncated_text, FONTS.BOLD_SMALL, column.alignment)
+        text_x = self._calculate_text_position(
+            x, column.width, truncated_text, FONTS.BOLD_SMALL, column.alignment
+        )
         draw.text((text_x, y), truncated_text, font=FONTS.BOLD_SMALL, fill=column.color)
 
-    def _render_number_cell(self, draw: ImageDraw.ImageDraw, cell_value: str,
-                          x: int, y: int, column: ColumnDefinition) -> None:
+    def _render_number_cell(
+        self,
+        draw: ImageDraw.ImageDraw,
+        cell_value: str,
+        x: int,
+        y: int,
+        column: ColumnDefinition,
+    ) -> None:
         """Render a number cell with right alignment."""
         # Truncate text to fit in column width
         max_width = column.width - 20  # Leave padding
         truncated_text = self._truncate_text(cell_value, column.font, max_width)
-        text_x = self._calculate_text_position(x, column.width, truncated_text, column.font, CellAlignment.RIGHT)
+        text_x = self._calculate_text_position(
+            x, column.width, truncated_text, column.font, CellAlignment.RIGHT
+        )
         draw.text((text_x, y), truncated_text, font=column.font, fill=column.color)
 
-    def _render_percentage_cell(self, draw: ImageDraw.ImageDraw, cell_value: str,
-                              x: int, y: int, column: ColumnDefinition) -> None:
+    def _render_percentage_cell(
+        self,
+        draw: ImageDraw.ImageDraw,
+        cell_value: str,
+        x: int,
+        y: int,
+        column: ColumnDefinition,
+    ) -> None:
         """Render cell with colored percentage highlighting."""
         try:
             # Split main text and percentage
@@ -297,14 +364,25 @@ class EnhancedTable:
             # Calculate position based on alignment
             if column.alignment == CellAlignment.CENTER:
                 full_text = f"{main_text} ({pct_part})"
-                text_x = self._calculate_text_position(x, column.width, full_text, column.font, column.alignment)
+                text_x = self._calculate_text_position(
+                    x, column.width, full_text, column.font, column.alignment
+                )
             else:
-                text_x = self._calculate_text_position(x, column.width, main_text, column.font, column.alignment)
+                text_x = self._calculate_text_position(
+                    x, column.width, main_text, column.font, column.alignment
+                )
 
             # Render main text and percentage
             draw_percentage_text(
-                draw, (text_x, y), main_text, f"({pct_part})",
-                column.font, column.font, column.color, pct_color, spacing=5
+                draw,
+                (text_x, y),
+                main_text,
+                f"({pct_part})",
+                column.font,
+                column.font,
+                column.color,
+                pct_color,
+                spacing=5,
             )
         except (IndexError, ValueError):
             # Fallback to regular rendering if parsing fails
@@ -339,8 +417,14 @@ class EnhancedTable:
 
         return result + ellipsis if result else text[:1] + ellipsis
 
-    def _calculate_text_position(self, x: int, width: int, text: str,
-                               font: ImageFont.ImageFont, alignment: CellAlignment) -> int:
+    def _calculate_text_position(
+        self,
+        x: int,
+        width: int,
+        text: str,
+        font: ImageFont.ImageFont,
+        alignment: CellAlignment,
+    ) -> int:
         """Calculate text x position based on alignment."""
         if alignment == CellAlignment.CENTER:
             text_width = font.getlength(text)
@@ -356,8 +440,9 @@ class EnhancedTable:
         return "(" in cell_value and ")" in cell_value and "%" in cell_value
 
 
-def create_auto_table(rows: List[List[str]], style: Optional[TableStyle] = None,
-                     total_width: int = 1740) -> EnhancedTable:
+def create_auto_table(
+    rows: List[List[str]], style: Optional[TableStyle] = None, total_width: int = 1740
+) -> EnhancedTable:
     """
     Factory function to create a table with auto-calculated columns from data.
 
@@ -403,7 +488,7 @@ def create_auto_table(rows: List[List[str]], style: Optional[TableStyle] = None,
         if i == 0:
             title = "Item"
         else:
-            title = f"Col {i+1}"
+            title = f"Col {i + 1}"
 
         columns.append(ColumnDefinition(title, width, alignment, cell_type))
 

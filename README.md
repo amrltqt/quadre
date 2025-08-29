@@ -1,6 +1,10 @@
-# NADA — Not A Dashboard App
+# quadre
 
 A Python tool that generates beautiful, serializable dashboard images from JSON using Pillow.
+Dashboard images are easy to share across slack, emails or any communication software that manage.
+
+Use image to make your dashboards accessible by everyone.
+
 For complete docs, see docs/index.md.
 
 ## Quickstart
@@ -8,20 +12,20 @@ For complete docs, see docs/index.md.
 Render an example dashboard to PNG using uv (no install required):
 
 ```bash
-uv run -m nada.main examples/declarative_featured.json out/featured.png
+uv run -m quadre.main examples/declarative_featured.json out/featured.png
 ```
 
 Validate a JSON document (schema + friendly warnings):
 
 ```bash
-uv run -m nada.validator examples/declarative_featured.json
+uv run -m quadre.validator examples/declarative_featured.json
 ```
 
 Using the installed CLI instead of uv:
 
 ```bash
-nada render examples/declarative_featured.json out.png
-nada validate examples/declarative_featured.json
+quadre render examples/declarative_featured.json out.png
+quadre validate examples/declarative_featured.json
 ```
 
 With Docker (reproducible environment):
@@ -58,7 +62,7 @@ make run
 ### Basic Usage
 
 ```bash
-uv run -m nada.main -i data.json
+uv run -m quadre.main -i data.json
 ```
 
 This generates `dashboard.png` from your JSON data.
@@ -66,7 +70,7 @@ This generates `dashboard.png` from your JSON data.
 ### Specify Output File
 
 ```bash
-uv run -m nada.main -i data.json -o my_dashboard.png
+uv run -m quadre.main -i data.json -o my_dashboard.png
 ```
 
 ### Command Line Options
@@ -79,13 +83,13 @@ uv run -m nada.main -i data.json -o my_dashboard.png
 
 ```bash
 # Generate dashboard with default output name
-uv run -m nada.main -i examples/flex_e2e.json
+uv run -m quadre.main -i examples/flex_e2e.json
 
 # Generate dashboard with custom output name
-uv run -m nada.main -i my_data.json -o report_2024.png
+uv run -m quadre.main -i my_data.json -o report_2024.png
 
 # Using long form arguments
-uv run -m nada.main --input quarterly_data.json --output q4_report.png
+uv run -m quadre.main --input quarterly_data.json --output q4_report.png
 
 # Docker examples
 make run
@@ -148,14 +152,14 @@ uv run examples/flex_demo.py
 uv run examples/flex_e2e.py
 
 # Render your JSON with the default (Flex) path
-uv run -m nada.main your_data.json output.png
+uv run -m quadre.main your_data.json output.png
 ```
 
 Images are written to `out/`.
 
 ## Flex Layout (Default)
 
-The renderer now uses a flexbox-like engine under `src/nada/flex` as the only path. It provides:
+The renderer now uses a flexbox-like engine under `src/quadre/flex` as the only path. It provides:
 
 - Flex containers with `direction` (row/column), `gap`, `align_items`, `padding`
 - Per-child `grow`, `shrink`, and `basis` properties to distribute space
@@ -200,11 +204,11 @@ See docs/declarative-layout.md for the JSON model, components, and examples.
 
 ## Theme System
 
-NADA supports a Pydantic‑validated theme that defines the color palette, font sizes, and per‑widget defaults (e.g., `FlexContainer` gaps/padding and `TableWidget` styles). A theme is loaded for every render, then the layout can still override any property via `properties`.
+quadre supports a Pydantic‑validated theme that defines the color palette, font sizes, and per‑widget defaults (e.g., `FlexContainer` gaps/padding and `TableWidget` styles). A theme is loaded for every render, then the layout can still override any property via `properties`.
 
-- Default theme file: `src/nada/theme/theme.json`
-- Env override: set `NADA_THEME=/path/to/theme.json`
-- CLI override: `nada render --theme dark data.json out.png` or `--theme /path/to/theme.json`
+- Default theme file: `src/quadre/theme/theme.json`
+- Env override: set `quadre_THEME=/path/to/theme.json`
+- CLI override: `quadre render --theme dark data.json out.png` or `--theme /path/to/theme.json`
 - Keys are case‑insensitive, but the bundled themes use lowercase (e.g., `colors.foreground`, `fonts.h1`).
 
 Example theme (partial):
@@ -236,10 +240,10 @@ Example CLI usage:
 
 ```bash
 # Use bundled dark theme
-nada render --theme dark examples/declarative_featured.json out_dark.png
+quadre render --theme dark examples/declarative_featured.json out_dark.png
 
 # Use a custom theme file
-nada render --theme /configs/my_theme.json examples/declarative_featured.json out.png
+quadre render --theme /configs/my_theme.json examples/declarative_featured.json out.png
 ```
 
 Notes:
@@ -248,7 +252,7 @@ Notes:
 
 ## Font Configuration
 
-NADA automatically detects system fonts but you can customize font usage for better consistency across platforms.
+quadre automatically detects system fonts but you can customize font usage for better consistency across platforms.
 
 ### Automatic Font Detection
 
@@ -260,17 +264,17 @@ The system automatically finds suitable fonts based on your platform:
 
 ### Custom Font Configuration
 
-Set a custom font using the `nada_FONT_PATH` environment variable:
+Set a custom font using the `quadre_FONT_PATH` environment variable:
 
 ```bash
 # macOS
-export nada_FONT_PATH="/System/Library/Fonts/Helvetica.ttc"
+export quadre_FONT_PATH="/System/Library/Fonts/Helvetica.ttc"
 
 # Windows  
-set nada_FONT_PATH=C:/Windows/Fonts/arial.ttf
+set quadre_FONT_PATH=C:/Windows/Fonts/arial.ttf
 
 # Linux
-export nada_FONT_PATH="/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+export quadre_FONT_PATH="/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 ```
 
 Add to your shell configuration file (`~/.zshrc`, `~/.bashrc`) to make it permanent.
@@ -313,7 +317,7 @@ uv run utils/font_diagnostic.py
 
 # This will show:
 # - Available system fonts
-# - Current NADA font configuration
+# - Current quadre font configuration
 # - Installation recommendations
 # - Generate a font test image
 ```
@@ -327,13 +331,13 @@ uv run utils/font_diagnostic.py
 
 **"Font not found" errors:**
 - Install recommended fonts for your platform
-- Set `nada_FONT_PATH` to a valid font file
+- Set `quadre_FONT_PATH` to a valid font file
 - Use the diagnostic tool to find available fonts
 
 **Docker font issues:**
 - Fonts are pre-installed in the Docker image
 - Custom fonts can be mounted as volumes
-- Use the `nada_FONT_PATH` environment variable in containers
+- Use the `quadre_FONT_PATH` environment variable in containers
 
 ## Output
 
@@ -345,7 +349,7 @@ Default canvas: 1920×1280 PNG with:
 
 ## Customization
 
-Customize via `src/nada/components/config.py` and Flex widgets in `src/nada/flex`. The Flex renderer composes existing components (KPI cards, tables) with a simpler layout model.
+Customize via `src/quadre/components/config.py` and Flex widgets in `src/quadre/flex`. The Flex renderer composes existing components (KPI cards, tables) with a simpler layout model.
 
 ## Font Support
 

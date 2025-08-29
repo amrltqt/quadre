@@ -1,5 +1,5 @@
 """
-NADA Components Package
+quadre Components Package
 
 This package contains reusable components for dashboard generation.
 Components are organized by complexity and responsibility:

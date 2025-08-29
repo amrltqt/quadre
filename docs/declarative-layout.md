@@ -50,5 +50,5 @@ Margins
 - `margin_top` and `margin_bottom` add vertical space via automatic `Spacer` wrappers.
 
 Validation
-- Run `nada validate file.json` to get errors and helpful warnings
+- Run `quadre validate file.json` to get errors and helpful warnings
 - The validator forbids legacy `data_ref`; use explicit fields (e.g., `title`, `text`, `table`)

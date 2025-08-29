@@ -11,10 +11,10 @@ uv run pytest -q
 Pixel tests (opt‑in):
 
 ```bash
-nada_PIXELS=1 uv run pytest -q tests/pixels
+quadre_PIXELS=1 uv run pytest -q tests/pixels
 
 # Record/update baselines
-nada_PIXELS=1 nada_RECORD=1 uv run pytest -q tests/pixels
+quadre_PIXELS=1 quadre_RECORD=1 uv run pytest -q tests/pixels
 ```
 
 Determinism

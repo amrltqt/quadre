@@ -5,8 +5,8 @@ import hashlib
 
 from PIL import Image
 
-from nada.flex.runner import render_dashboard_with_flex
-from nada.components.config import DIMENSIONS
+from quadre.flex.runner import render_dashboard_with_flex
+from quadre.components.config import DIMENSIONS
 
 
 def _hash_png(path: Path) -> str:

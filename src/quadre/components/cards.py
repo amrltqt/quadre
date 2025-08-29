@@ -1,5 +1,5 @@
 """
-Card components for NADA (Not A Dashboard App).
+Card components for quadre (Not A Dashboard App).
 
 This module contains card-based UI components including KPI cards and section cards.
 All cards follow consistent styling patterns and can be easily customized.
@@ -47,8 +47,12 @@ class KPICard:
 
         # Draw card background
         rounded_rectangle(
-            draw, (x, y, x + width, y + self.height), DIMENSIONS.CARD_RADIUS,
-            fill=COLORS.CARD_BACKGROUND, outline=COLORS.BORDER, width=1
+            draw,
+            (x, y, x + width, y + self.height),
+            DIMENSIONS.CARD_RADIUS,
+            fill=COLORS.CARD_BACKGROUND,
+            outline=COLORS.BORDER,
+            width=1,
         )
 
         # Available width for content (minus padding)
@@ -58,13 +62,20 @@ class KPICard:
         title_x = x + 20
         title_y = y + 16
         title_text = self._truncate_text(self.title, FONTS.SMALL, content_width)
-        draw.text((title_x, title_y), title_text, font=FONTS.SMALL, fill=COLORS.MUTED_FOREGROUND)
+        draw.text(
+            (title_x, title_y),
+            title_text,
+            font=FONTS.SMALL,
+            fill=COLORS.MUTED_FOREGROUND,
+        )
 
         # Draw value with text wrapping if needed
         value_x = x + 20
         value_y = y + 50
         value_text = self._truncate_text(self.value, FONTS.NUMBER, content_width)
-        draw.text((value_x, value_y), value_text, font=FONTS.NUMBER, fill=COLORS.FOREGROUND)
+        draw.text(
+            (value_x, value_y), value_text, font=FONTS.NUMBER, fill=COLORS.FOREGROUND
+        )
 
         # Draw delta badge if present
         if self.delta:
@@ -78,8 +89,14 @@ class KPICard:
             if has_pct:
                 pct = float(self.delta.get("pct", 0) or 0)
                 icon, _, _ = get_delta_display_info(pct)
-                text_parts.append(f"{icon} {abs(int(pct) if pct.is_integer() else pct)}%")
-                variant = "success" if pct > 0 else ("destructive" if pct < 0 else "secondary")
+                text_parts.append(
+                    f"{icon} {abs(int(pct) if pct.is_integer() else pct)}%"
+                )
+                variant = (
+                    "success"
+                    if pct > 0
+                    else ("destructive" if pct < 0 else "secondary")
+                )
 
             # Prefer explicit vs absolute value over from-label if provided
             if vs_value is not None and str(vs_value) != "":
@@ -146,7 +163,9 @@ class SectionCard:
         self.width = 0
         self.height = 0
 
-    def render(self, draw: ImageDraw.ImageDraw, x: int, y: int, width: int, height: int) -> None:
+    def render(
+        self, draw: ImageDraw.ImageDraw, x: int, y: int, width: int, height: int
+    ) -> None:
         """
         Render the section card at the specified position.
 
@@ -162,19 +181,30 @@ class SectionCard:
 
         # Draw card background
         rounded_rectangle(
-            draw, (x, y, x + width, y + height), DIMENSIONS.CARD_RADIUS,
-            fill=COLORS.CARD_BACKGROUND, outline=COLORS.BORDER, width=1
+            draw,
+            (x, y, x + width, y + height),
+            DIMENSIONS.CARD_RADIUS,
+            fill=COLORS.CARD_BACKGROUND,
+            outline=COLORS.BORDER,
+            width=1,
         )
 
         # Draw title
         title_x = x + 20
         title_y = y + 16
-        draw.text((title_x, title_y), self.title, font=FONTS.SMALL, fill=COLORS.MUTED_FOREGROUND)
+        draw.text(
+            (title_x, title_y),
+            self.title,
+            font=FONTS.SMALL,
+            fill=COLORS.MUTED_FOREGROUND,
+        )
 
         # Draw value
         value_x = x + 20
         value_y = y + 50
-        draw.text((value_x, value_y), self.value, font=FONTS.NUMBER, fill=COLORS.FOREGROUND)
+        draw.text(
+            (value_x, value_y), self.value, font=FONTS.NUMBER, fill=COLORS.FOREGROUND
+        )
 
         # Draw delta text if present (not as badge for section cards)
         if self.delta:
@@ -187,7 +217,9 @@ class SectionCard:
             if has_pct:
                 pct = float(self.delta.get("pct", 0) or 0)
                 icon, color, _ = get_delta_display_info(pct)
-                text_parts.append(f"{icon} {abs(int(pct) if pct.is_integer() else pct)}%")
+                text_parts.append(
+                    f"{icon} {abs(int(pct) if pct.is_integer() else pct)}%"
+                )
 
             if vs_value is not None and str(vs_value) != "":
                 text_parts.append(f"vs {vs_value}")
