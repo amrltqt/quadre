@@ -1,30 +1,105 @@
 {
-  "canvas": { "height": "auto" },
-  "title": "Featured Layout Demo",
-  "date_note": "Mise en avant d'une métrique principale",
-  "top_kpis": [
-    {"title": "Total Revenue", "value": "4,567k€", "delta": {"pct": 32}},
-    {"title": "Monthly Users", "value": "1,234k", "delta": {"pct": 15}},
-    {"title": "Conversion Rate", "value": "6.8%", "delta": {"pct": 12}},
-    {"title": "Satisfaction", "value": "97%", "delta": {"pct": 3}}
-  ],
+  "canvas": {
+    "height": "auto"
+  },
+  "data": {
+    "title": "Featured Layout Demo",
+    "date_note": "Highlight of a primary metric",
+    "top_kpis": [
+      {
+        "title": "Total Revenue",
+        "value": "4,567k€",
+        "delta": {
+          "pct": 32
+        }
+      },
+      {
+        "title": "Monthly Users",
+        "value": "1,234k",
+        "delta": {
+          "pct": 15
+        }
+      },
+      {
+        "title": "Conversion Rate",
+        "value": "6.8%",
+        "delta": {
+          "pct": 12
+        }
+      },
+      {
+        "title": "Satisfaction",
+        "value": "97%",
+        "delta": {
+          "pct": 3
+        }
+      }
+    ]
+  },
   "layout": [
     {
       "type": "row",
-      "properties": {"gap": 25},
+      "properties": {
+        "gap": 25
+      },
       "children": [
         {
           "type": "kpi_card",
-          "data_ref": "$.top_kpis[0]",
-          "properties": {"width_ratio": 0.5}
+          "title": {
+            "$": "$.top_kpis[0].title"
+          },
+          "value": {
+            "$": "$.top_kpis[0].value"
+          },
+          "delta": {
+            "$": "$.top_kpis[0].delta"
+          },
+          "properties": {
+            "width_ratio": 0.5
+          }
         },
         {
           "type": "column",
-          "properties": {"gap": 15},
+          "properties": {
+            "gap": 15
+          },
           "children": [
-            {"type": "kpi_card", "data_ref": "$.top_kpis[1]"},
-            {"type": "kpi_card", "data_ref": "$.top_kpis[2]"},
-            {"type": "kpi_card", "data_ref": "$.top_kpis[3]"}
+            {
+              "type": "kpi_card",
+              "title": {
+                "$": "$.top_kpis[1].title"
+              },
+              "value": {
+                "$": "$.top_kpis[1].value"
+              },
+              "delta": {
+                "$": "$.top_kpis[1].delta"
+              }
+            },
+            {
+              "type": "kpi_card",
+              "title": {
+                "$": "$.top_kpis[2].title"
+              },
+              "value": {
+                "$": "$.top_kpis[2].value"
+              },
+              "delta": {
+                "$": "$.top_kpis[2].delta"
+              }
+            },
+            {
+              "type": "kpi_card",
+              "title": {
+                "$": "$.top_kpis[3].title"
+              },
+              "value": {
+                "$": "$.top_kpis[3].value"
+              },
+              "delta": {
+                "$": "$.top_kpis[3].delta"
+              }
+            }
           ]
         }
       ]

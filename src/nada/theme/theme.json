@@ -1,0 +1,69 @@
+{
+  "colors": {
+    "background": "#ffffff",
+    "card_background": "#ffffff",
+    "muted": "#f1f5f9",
+    "border": "#d1d5db",
+    "input": "#e2e8f0",
+    "ring": "#3b82f6",
+    "foreground": "#0f172a",
+    "muted_foreground": "#64748b",
+    "primary": "#0f172a",
+    "primary_foreground": "#f8fafc",
+    "secondary": "#f1f5f9",
+    "secondary_foreground": "#0f172a",
+    "accent": "#f1f5f9",
+    "accent_foreground": "#0f172a",
+    "destructive": "#ef4444",
+    "destructive_foreground": "#f8fafc",
+    "success": "#22c55e",
+    "success_foreground": "#f8fafc",
+    "warning": "#eab308",
+    "warning_foreground": "#0f172a"
+  },
+  "fonts": {
+    "h1": 42,
+    "h2": 30,
+    "number": 40,
+    "body": 24,
+    "table": 24,
+    "small": 20,
+    "bold_small": 24
+  },
+  "widgets": {
+    "FlexContainer": {
+      "gap": 16,
+      "align_items": "stretch",
+      "justify_content": "start",
+      "padding": 0,
+      "bg_fill": null,
+      "bg_outline": null,
+      "bg_radius": 12
+    },
+    "TextWidget": {
+      "fill": "FOREGROUND",
+      "align": "left",
+      "font": "body"
+    },
+    "TableWidget": {
+      "fill_height": false,
+      "fit": "truncate",
+      "min_row_height": 28,
+      "max_row_height": 90,
+      "shrink_row_height_floor": 14,
+      "style": {
+        "background_color": "card_background",
+        "border_color": "border",
+        "header_background": "muted",
+        "alt_row_background": "muted",
+        "text_color": "foreground",
+        "header_text_color": "foreground",
+        "padding": 20,
+        "use_alternating_rows": true
+      }
+    },
+    "Spacer": {
+      "height": 24
+    }
+  }
+}

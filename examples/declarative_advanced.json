@@ -62,7 +62,8 @@
   "layout": [
     {
       "type": "title",
-      "data_ref": "$.header"
+      "title": { "$": "$.header.title" },
+      "date_note": { "$": "$.header.date_note" }
     },
     {
       "type": "spacer",
@@ -74,15 +75,17 @@
       "children": [
         {
           "type": "kpi_card",
-          "data_ref": "$.main_kpis[0]",
+          "title": {"$": "$.main_kpis[0].title"},
+          "value": {"$": "$.main_kpis[0].value"},
+          "delta": {"$": "$.main_kpis[0].delta"},
           "properties": { "width_ratio": 0.6 }
         },
         {
           "type": "column",
           "properties": { "gap": 15 },
           "children": [
-            { "type": "kpi_card", "data_ref": "$.main_kpis[1]" },
-            { "type": "kpi_card", "data_ref": "$.main_kpis[2]" }
+            { "type": "kpi_card", "title": {"$": "$.main_kpis[1].title"}, "value": {"$": "$.main_kpis[1].value"}, "delta": {"$": "$.main_kpis[1].delta"} },
+            { "type": "kpi_card", "title": {"$": "$.main_kpis[2].title"}, "value": {"$": "$.main_kpis[2].value"}, "delta": {"$": "$.main_kpis[2].delta"} }
           ]
         }
       ]
@@ -93,8 +96,8 @@
     },
     {
       "type": "text",
+      "text": "Performance Metrics",
       "properties": {
-        "text": "Performance Metrics",
         "font": "heading",
         "color": "#1a202c",
         "align": "left",
@@ -105,9 +108,9 @@
       "type": "row",
       "properties": { "gap": 20 },
       "children": [
-        { "type": "kpi_card", "data_ref": "$.performance_metrics[0]" },
-        { "type": "kpi_card", "data_ref": "$.performance_metrics[1]" },
-        { "type": "kpi_card", "data_ref": "$.performance_metrics[2]" }
+        { "type": "kpi_card", "title": {"$": "$.performance_metrics[0].title"}, "value": {"$": "$.performance_metrics[0].value"}, "delta": {"$": "$.performance_metrics[0].delta"} },
+        { "type": "kpi_card", "title": {"$": "$.performance_metrics[1].title"}, "value": {"$": "$.performance_metrics[1].value"}, "delta": {"$": "$.performance_metrics[1].delta"} },
+        { "type": "kpi_card", "title": {"$": "$.performance_metrics[2].title"}, "value": {"$": "$.performance_metrics[2].value"}, "delta": {"$": "$.performance_metrics[2].delta"} }
       ]
     },
     {
@@ -116,8 +119,8 @@
     },
     {
       "type": "text",
+      "text": "Regional Performance",
       "properties": {
-        "text": "Regional Performance",
         "font": "heading",
         "color": "#1a202c",
         "align": "left",
@@ -128,9 +131,9 @@
       "type": "grid",
       "properties": { "columns": 3, "gap": 18 },
       "children": [
-        { "type": "kpi_card", "data_ref": "$.regional_data[0]" },
-        { "type": "kpi_card", "data_ref": "$.regional_data[1]" },
-        { "type": "kpi_card", "data_ref": "$.regional_data[2]" }
+        { "type": "kpi_card", "title": {"$": "$.regional_data[0].title"}, "value": {"$": "$.regional_data[0].value"}, "delta": {"$": "$.regional_data[0].delta"} },
+        { "type": "kpi_card", "title": {"$": "$.regional_data[1].title"}, "value": {"$": "$.regional_data[1].value"}, "delta": {"$": "$.regional_data[1].delta"} },
+        { "type": "kpi_card", "title": {"$": "$.regional_data[2].title"}, "value": {"$": "$.regional_data[2].value"}, "delta": {"$": "$.regional_data[2].delta"} }
       ]
     },
     {
@@ -139,8 +142,8 @@
     },
     {
       "type": "text",
+      "text": "Platform Performance Breakdown",
       "properties": {
-        "text": "Platform Performance Breakdown",
         "font": "heading",
         "color": "#1a202c",
         "align": "left",
@@ -149,7 +152,7 @@
     },
     {
       "type": "table",
-      "data_ref": "$.platform_table"
+      "table": { "$": "$.platform_table" }
     },
     {
       "type": "spacer",
@@ -157,7 +160,7 @@
     },
     {
       "type": "text",
-      "data_ref": "$.summary",
+      "text": { "$": "$.summary" },
       "properties": {
         "font": "body",
         "color": "#64748b",
@@ -167,7 +170,7 @@
     },
     {
       "type": "text",
-      "data_ref": "$.footer_note",
+      "text": { "$": "$.footer_note" },
       "properties": {
         "font": "caption",
         "color": "#9ca3af",

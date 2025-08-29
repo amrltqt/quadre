@@ -2,29 +2,30 @@
   "canvas": { "height": "auto" },
   "data": {
     "header": {
-      "title": "Declarative Layout Demo - Simple",
-      "date_note": "Layout avec références explicites aux données"
+      "title": "Sample Dashboard — Simple",
+      "date_note": "Synthetic example data"
     },
     "kpis": [
-      { "title": "Revenue", "value": "1,234k€", "delta": { "pct": 15 } },
-      { "title": "Users", "value": "567k", "delta": { "pct": -3 } },
-      { "title": "Orders", "value": "8,901", "delta": { "pct": 8 } },
-      { "title": "Conversion", "value": "4.2%", "delta": { "pct": 12 } }
+      { "title": "Revenue",   "value": "7,842k€", "delta": { "pct": 13 } },
+      { "title": "Users",     "value": "312k",   "delta": { "pct": -6 } },
+      { "title": "Orders",    "value": "10,572", "delta": { "pct": 4 } },
+      { "title": "Conversion","value": "3.7%",   "delta": { "pct": 9 } }
     ]
   },
   "layout": [
     {
       "type": "title",
-      "data_ref": "$.header"
+      "title": { "$": "$.header.title" },
+      "date_note": { "$": "$.header.date_note" }
     },
     {
       "type": "row",
       "properties": { "gap": 20 },
       "children": [
-        { "type": "kpi_card", "data_ref": "$.kpis[0]" },
-        { "type": "kpi_card", "data_ref": "$.kpis[1]" },
-        { "type": "kpi_card", "data_ref": "$.kpis[2]" },
-        { "type": "kpi_card", "data_ref": "$.kpis[3]" }
+        { "type": "kpi_card", "title": {"$": "$.kpis[0].title"}, "value": {"$": "$.kpis[0].value"}, "delta": {"$": "$.kpis[0].delta"} },
+        { "type": "kpi_card", "title": {"$": "$.kpis[1].title"}, "value": {"$": "$.kpis[1].value"}, "delta": {"$": "$.kpis[1].delta"} },
+        { "type": "kpi_card", "title": {"$": "$.kpis[2].title"}, "value": {"$": "$.kpis[2].value"}, "delta": {"$": "$.kpis[2].delta"} },
+        { "type": "kpi_card", "title": {"$": "$.kpis[3].title"}, "value": {"$": "$.kpis[3].value"}, "delta": {"$": "$.kpis[3].delta"} }
       ]
     }
   ]

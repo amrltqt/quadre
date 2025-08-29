@@ -1,0 +1,145 @@
+{
+  "canvas": {
+    "height": "auto",
+    "scale": 1.0,
+    "downscale": false
+  },
+  "data": {
+    "logo_path": "./examples/PNG_test.png",
+    "kpis": {
+      "users": {
+        "title": "Active Users",
+        "value": "12,345",
+        "delta": {
+          "pct": 5.2,
+          "from": "last week"
+        }
+      },
+      "revenue": {
+        "title": "MRR",
+        "value": "$87.4k",
+        "delta": {
+          "pct": -2.1,
+          "from": "last month"
+        }
+      }
+    },
+    "progress": {
+      "completion_pct": 72
+    },
+    "status": {
+      "label": "Degraded"
+    },
+    "table": {
+      "headers": [
+        "Item",
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "rows": [
+        [
+          "Platform A",
+          "12%",
+          "15%",
+          "18%",
+          "22%"
+        ],
+        [
+          "Platform B",
+          "8%",
+          "9%",
+          "11%",
+          "12%"
+        ],
+        [
+          "Platform C",
+          "25%",
+          "21%",
+          "19%",
+          "17%"
+        ]
+      ]
+    }
+  },
+  "layout": [
+    {
+      "type": "title",
+      "title": "All Widgets Demo",
+      "date_note": "Generated today"
+    },
+    {
+      "type": "status_badge",
+      "text": {
+        "$": "$.status.label"
+      },
+      "properties": {
+        "variant": "warning"
+      }
+    },
+    {
+      "type": "progress",
+      "value": {
+        "$": "$.progress.completion_pct"
+      },
+      "label": "Completion",
+      "properties": {
+        "bar_height": 18,
+        "fill": "#22c55e",
+        "width_ratio": 3
+      }
+    },
+    {
+      "type": "row",
+      "children": [
+        {
+          "type": "kpi_card",
+          "title": {
+            "$": "$.kpis.users.title"
+          },
+          "value": {
+            "$": "$.kpis.users.value"
+          },
+          "delta": {
+            "$": "$.kpis.users.delta"
+          }
+        },
+        {
+          "type": "kpi_card",
+          "title": {
+            "$": "$.kpis.revenue.title"
+          },
+          "value": {
+            "$": "$.kpis.revenue.value"
+          },
+          "delta": {
+            "$": "$.kpis.revenue.delta"
+          }
+        }
+      ]
+    },
+    {
+      "type": "image",
+      "src": {
+        "$": "$.logo_path"
+      },
+      "properties": {
+        "fit": "contain",
+        "radius": 12,
+        "opacity": 0.95,
+        "margin_top": 16,
+        "margin_bottom": 8
+      }
+    },
+    {
+      "type": "table",
+      "table": {
+        "$": "$.table"
+      },
+      "properties": {
+        "margin_top": 12
+      }
+    }
+  ]
+}

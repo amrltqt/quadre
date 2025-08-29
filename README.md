@@ -1,6 +1,34 @@
-# Ez-Pillow Dashboard Generator
+# NADA — Not A Dashboard App
 
-A Python CLI tool that generates beautiful dashboard images from JSON data using PIL/Pillow.
+A Python tool that generates beautiful, serializable dashboard images from JSON using Pillow.
+For complete docs, see docs/index.md.
+
+## Quickstart
+
+Render an example dashboard to PNG using uv (no install required):
+
+```bash
+uv run -m nada.main examples/declarative_featured.json out/featured.png
+```
+
+Validate a JSON document (schema + friendly warnings):
+
+```bash
+uv run -m nada.validator examples/declarative_featured.json
+```
+
+Using the installed CLI instead of uv:
+
+```bash
+nada render examples/declarative_featured.json out.png
+nada validate examples/declarative_featured.json
+```
+
+With Docker (reproducible environment):
+
+```bash
+make run examples/declarative_featured.json
+```
 
 ## Features
 
@@ -30,7 +58,7 @@ make run
 ### Basic Usage
 
 ```bash
-uv run -m ezp.main -i data.json
+uv run -m nada.main -i data.json
 ```
 
 This generates `dashboard.png` from your JSON data.
@@ -38,7 +66,7 @@ This generates `dashboard.png` from your JSON data.
 ### Specify Output File
 
 ```bash
-uv run -m ezp.main -i data.json -o my_dashboard.png
+uv run -m nada.main -i data.json -o my_dashboard.png
 ```
 
 ### Command Line Options
@@ -51,13 +79,13 @@ uv run -m ezp.main -i data.json -o my_dashboard.png
 
 ```bash
 # Generate dashboard with default output name
-uv run -m ezp.main -i examples/flex_e2e.json
+uv run -m nada.main -i examples/flex_e2e.json
 
 # Generate dashboard with custom output name
-uv run -m ezp.main -i my_data.json -o report_2024.png
+uv run -m nada.main -i my_data.json -o report_2024.png
 
 # Using long form arguments
-uv run -m ezp.main --input quarterly_data.json --output q4_report.png
+uv run -m nada.main --input quarterly_data.json --output q4_report.png
 
 # Docker examples
 make run
@@ -120,14 +148,14 @@ uv run examples/flex_demo.py
 uv run examples/flex_e2e.py
 
 # Render your JSON with the default (Flex) path
-uv run -m ezp.main your_data.json output.png
+uv run -m nada.main your_data.json output.png
 ```
 
 Images are written to `out/`.
 
 ## Flex Layout (Default)
 
-The renderer now uses a flexbox-like engine under `src/ezp/flex` as the only path. It provides:
+The renderer now uses a flexbox-like engine under `src/nada/flex` as the only path. It provides:
 
 - Flex containers with `direction` (row/column), `gap`, `align_items`, `padding`
 - Per-child `grow`, `shrink`, and `basis` properties to distribute space
@@ -166,82 +194,61 @@ python examples/flex_e2e.py data.json out/flex_e2e.png
 
 This renders a header, a KPI row, and a simple platform list using the Flex engine.
 
-## JSON Data Format
+## Declarative JSON
 
-Your input JSON file should follow this structure:
+See docs/declarative-layout.md for the JSON model, components, and examples.
+
+## Theme System
+
+NADA supports a Pydantic‑validated theme that defines the color palette, font sizes, and per‑widget defaults (e.g., `FlexContainer` gaps/padding and `TableWidget` styles). A theme is loaded for every render, then the layout can still override any property via `properties`.
+
+- Default theme file: `src/nada/theme/theme.json`
+- Env override: set `NADA_THEME=/path/to/theme.json`
+- CLI override: `nada render --theme dark data.json out.png` or `--theme /path/to/theme.json`
+- Keys are case‑insensitive, but the bundled themes use lowercase (e.g., `colors.foreground`, `fonts.h1`).
+
+Example theme (partial):
 
 ```json
 {
-  "title": "Dashboard Title",
-  "date_note": "Optional date/period note",
-  "layout": {
-    "type": "horizontal|priority|grid_2x3|grid_3x2|pyramid|featured|responsive|custom",
-    "positions": [
-      {"x": 400, "y": 0, "width": 350}
-    ]
+  "colors": {
+    "background": "#ffffff",
+    "foreground": "#0f172a",
+    "border": "#d1d5db",
+    "muted": "#f1f5f9"
   },
-  "top_kpis": [
-    {
-      "title": "KPI Name",
-      "value": "123.4 k€",
-      "delta": {
-        "pct": -5,
-        "from": "130.0 k€"
+  "fonts": { "h1": 42, "number": 40, "body": 24 },
+  "widgets": {
+    "TextWidget": { "fill": "foreground", "font": "body" },
+    "TableWidget": {
+      "min_row_height": 28,
+      "style": {
+        "background_color": "card_background",
+        "header_background": "muted",
+        "text_color": "foreground"
       }
     }
-  ],
-  "platform_rows": [
-    ["Platform", "Col1 Value", "Col2 Value", "..."]
-  ],
-  "notes_left": "Left side note",
-  "notes_right": "Right side note",
-  "mid_section": {
-    "title": "Middle Section Title",
-    "cards": [
-      {
-        "title": "Card Title",
-        "value": "Card Value",
-        "delta": {
-          "pct": 10,
-          "from": "Previous Value"
-        }
-      }
-    ]
-  },
-  "bottom_section": {
-    "title": "Bottom Section Title",
-    "cards": [
-      // Same structure as mid_section cards
-    ]
   }
 }
 ```
 
-### Required Fields
-- `title`: Dashboard title (string)
-- `top_kpis`: Array of KPI objects
+Example CLI usage:
 
-### Optional Fields
-- `date_note`: Subtitle or date information (string)
-- `layout`: Layout configuration object
-  - `type`: Layout type (string, default: "horizontal")  
-  - `positions`: For custom layout only - array of position objects
-- `platform_rows`: Table data as array of arrays
-- `notes_left`, `notes_right`: Footer notes (strings)
-- `mid_section`, `bottom_section`: Additional card sections
+```bash
+# Use bundled dark theme
+nada render --theme dark examples/declarative_featured.json out_dark.png
 
-### KPI Object Structure
-- `title`: KPI name (string)
-- `value`: Current value (string)
-- `delta`: Change information (object, optional)
-  - `pct`: Percentage change (number)
-  - `from`: Previous value (string, optional)
+# Use a custom theme file
+nada render --theme /configs/my_theme.json examples/declarative_featured.json out.png
+```
 
-See `example_data.json` for a complete working example.
+Notes:
+- The layout can override any property per widget via `properties`. For tables, you can pass `properties.style` to override theme table styles locally.
+- A top‑level `theme` object in the document can still adjust colors/fonts quickly, but per‑widget defaults come from the validated theme file.
 
 ## Font Configuration
 
-EZ Pillow automatically detects system fonts but you can customize font usage for better consistency across platforms.
+NADA automatically detects system fonts but you can customize font usage for better consistency across platforms.
 
 ### Automatic Font Detection
 
@@ -253,17 +260,17 @@ The system automatically finds suitable fonts based on your platform:
 
 ### Custom Font Configuration
 
-Set a custom font using the `EZP_FONT_PATH` environment variable:
+Set a custom font using the `nada_FONT_PATH` environment variable:
 
 ```bash
 # macOS
-export EZP_FONT_PATH="/System/Library/Fonts/Helvetica.ttc"
+export nada_FONT_PATH="/System/Library/Fonts/Helvetica.ttc"
 
 # Windows  
-set EZP_FONT_PATH=C:/Windows/Fonts/arial.ttf
+set nada_FONT_PATH=C:/Windows/Fonts/arial.ttf
 
 # Linux
-export EZP_FONT_PATH="/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+export nada_FONT_PATH="/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 ```
 
 Add to your shell configuration file (`~/.zshrc`, `~/.bashrc`) to make it permanent.
@@ -306,7 +313,7 @@ uv run utils/font_diagnostic.py
 
 # This will show:
 # - Available system fonts
-# - Current EZ Pillow font configuration
+# - Current NADA font configuration
 # - Installation recommendations
 # - Generate a font test image
 ```
@@ -320,13 +327,13 @@ uv run utils/font_diagnostic.py
 
 **"Font not found" errors:**
 - Install recommended fonts for your platform
-- Set `EZP_FONT_PATH` to a valid font file
+- Set `nada_FONT_PATH` to a valid font file
 - Use the diagnostic tool to find available fonts
 
 **Docker font issues:**
 - Fonts are pre-installed in the Docker image
 - Custom fonts can be mounted as volumes
-- Use the `EZP_FONT_PATH` environment variable in containers
+- Use the `nada_FONT_PATH` environment variable in containers
 
 ## Output
 
@@ -338,7 +345,7 @@ Default canvas: 1920×1280 PNG with:
 
 ## Customization
 
-Customize via `src/ezp/components/config.py` and Flex widgets in `src/ezp/flex`. The Flex renderer composes existing components (KPI cards, tables) with a simpler layout model.
+Customize via `src/nada/components/config.py` and Flex widgets in `src/nada/flex`. The Flex renderer composes existing components (KPI cards, tables) with a simpler layout model.
 
 ## Font Support
 

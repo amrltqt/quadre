@@ -1,0 +1,130 @@
+from __future__ import annotations
+
+from typing import Dict, Any
+
+from PIL import Image, ImageDraw
+
+from ..components import COLORS, DIMENSIONS
+from ..components.config import apply_theme, set_scale, reset_scale
+from ..theme import (
+    load_theme_from_env_or_default,
+    as_apply_theme_dict,
+    widget_defaults_from_theme,
+)
+from .defaults import set_widget_defaults
+from .adapter import build_layout_from_declarative
+
+
+def render_dashboard_with_flex(
+    data: Dict[str, Any], out_path: str = "dashboard.png"
+) -> str:
+    """
+    Render with effectively unconstrained height then crop to the final canvas.
+
+    This avoids per-widget truncation/shrink decisions by letting content lay out
+    naturally, and clipping at the end. Protects memory with a sane max height.
+    """
+    # Capture base width/height before scaling
+    base_W, base_H = DIMENSIONS.WIDTH, DIMENSIONS.HEIGHT
+    W, H_default = base_W, base_H
+    canvas_cfg = (data.get("canvas") or {}) if isinstance(data, dict) else {}
+
+    # Default to auto-height unless explicitly disabled
+    auto_height: bool = True
+    fixed_height_override: int | None = None
+
+    # Interpret explicit canvas.height setting
+    if "height" in canvas_cfg:
+        hv = canvas_cfg.get("height")
+        if isinstance(hv, str):
+            if hv.lower() == "auto":
+                auto_height = True
+            elif hv.lower() == "fixed":
+                auto_height = False
+        elif isinstance(hv, int):
+            auto_height = False
+            fixed_height_override = hv
+
+    # Top-level switch can override
+    if isinstance(data, dict) and "auto_height" in data:
+        auto_height = bool(data.get("auto_height"))
+
+    # Bounds for auto height
+    max_auto_h = (
+        int(canvas_cfg.get("max_height", H_default * 10)) if auto_height else H_default
+    )
+    min_auto_h = (
+        int(canvas_cfg.get("min_height", H_default)) if auto_height else H_default
+    )
+
+    # Load validated theme (env var NADA_THEME or bundled default), then allow doc-level overrides
+    base_theme = load_theme_from_env_or_default()
+    apply_theme(as_apply_theme_dict(base_theme))
+    # Expose per-widget defaults from theme to the flex defaults provider
+    set_widget_defaults(widget_defaults_from_theme(base_theme))
+
+    # Optional theme application from document (top-level 'theme' can be dict or path to JSON file)
+    theme_obj = None
+    if isinstance(data, dict) and data.get("theme") is not None:
+        theme_val = data.get("theme")
+        if isinstance(theme_val, str):
+            try:
+                import json as _json
+                from pathlib import Path as _Path
+
+                theme_obj = _json.loads(_Path(theme_val).read_text(encoding="utf-8"))
+            except Exception:
+                theme_obj = None
+        elif isinstance(theme_val, dict):
+            theme_obj = theme_val
+    if theme_obj:
+        apply_theme(theme_obj)
+
+    root = build_layout_from_declarative(data)
+
+    # Apply supersampling scale if requested
+    scale = float(canvas_cfg.get("scale", 1.0))
+    downscale = bool(canvas_cfg.get("downscale", False))
+    if scale and scale != 1.0:
+        set_scale(scale)
+        # refresh scaled W/H
+        W, H_default = DIMENSIONS.WIDTH, DIMENSIONS.HEIGHT
+
+    # Measure preferred height with a huge available height (scaled)
+    probe_img = Image.new("RGB", (W, 10), COLORS.BACKGROUND)
+    probe_draw = ImageDraw.Draw(probe_img)
+    setattr(probe_draw, "_nada_image", probe_img)
+    _, preferred_h = root.measure(probe_draw, W, 10_000_000)
+
+    if auto_height:
+        # Choose final height based on content within bounds
+        final_h = max(min_auto_h, min(preferred_h, max_auto_h))
+        img = Image.new("RGB", (W, final_h), COLORS.BACKGROUND)
+        draw = ImageDraw.Draw(img)
+        setattr(draw, "_nada_image", img)
+        root.render(draw, 0, 0, W, final_h)
+        if scale != 1.0 and downscale:
+            # Downsample to base size with high-quality filter
+            target_h = max(int(final_h / scale), 1)
+            img = img.resize((base_W, target_h), Image.LANCZOS)
+        img.save(out_path)
+    else:
+        # Cap offscreen height to avoid excessive memory usage
+        H_page = fixed_height_override or H_default
+        MAX_OFFSCREEN = H_page * 5
+        off_h = max(H_page, min(preferred_h, MAX_OFFSCREEN))
+
+        # Render to offscreen then crop to fixed page height
+        off = Image.new("RGB", (W, off_h), COLORS.BACKGROUND)
+        off_draw = ImageDraw.Draw(off)
+        setattr(off_draw, "_nada_image", off)
+        root.render(off_draw, 0, 0, W, off_h)
+
+        final = off.crop((0, 0, W, H_page)) if off_h != H_page else off
+        if scale != 1.0 and downscale:
+            final = final.resize((base_W, int(H_page / scale)), Image.LANCZOS)
+        final.save(out_path)
+    # Always restore scale back to 1x for subsequent runs
+    if scale and scale != 1.0:
+        reset_scale()
+    return out_path

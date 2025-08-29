@@ -38,12 +38,13 @@
   "layout": [
     {
       "type": "title",
-      "data_ref": "$.header"
+      "title": { "$": "$.header.title" },
+      "date_note": { "$": "$.header.date_note" }
     },
     {
       "type": "text",
+      "text": "Testing Long Text Truncation",
       "properties": {
-        "text": "Testing Long Text Truncation",
         "font": "heading",
         "color": "#1a202c",
         "align": "left",
@@ -54,10 +55,10 @@
       "type": "row",
       "properties": { "gap": 15 },
       "children": [
-        { "type": "kpi_card", "data_ref": "$.problematic_kpis[0]" },
-        { "type": "kpi_card", "data_ref": "$.problematic_kpis[1]" },
-        { "type": "kpi_card", "data_ref": "$.problematic_kpis[2]" },
-        { "type": "kpi_card", "data_ref": "$.problematic_kpis[3]" }
+        { "type": "kpi_card", "title": {"$": "$.problematic_kpis[0].title"}, "value": {"$": "$.problematic_kpis[0].value"}, "delta": {"$": "$.problematic_kpis[0].delta"} },
+        { "type": "kpi_card", "title": {"$": "$.problematic_kpis[1].title"}, "value": {"$": "$.problematic_kpis[1].value"}, "delta": {"$": "$.problematic_kpis[1].delta"} },
+        { "type": "kpi_card", "title": {"$": "$.problematic_kpis[2].title"}, "value": {"$": "$.problematic_kpis[2].value"}, "delta": {"$": "$.problematic_kpis[2].delta"} },
+        { "type": "kpi_card", "title": {"$": "$.problematic_kpis[3].title"}, "value": {"$": "$.problematic_kpis[3].value"}, "delta": {"$": "$.problematic_kpis[3].delta"} }
       ]
     },
     {
@@ -66,8 +67,8 @@
     },
     {
       "type": "text",
+      "text": "Long Text Wrapping Test",
       "properties": {
-        "text": "Long Text Wrapping Test",
         "font": "heading",
         "color": "#1a202c",
         "align": "left",
@@ -76,7 +77,7 @@
     },
     {
       "type": "text",
-      "data_ref": "$.very_long_text",
+      "text": { "$": "$.very_long_text" },
       "properties": {
         "font": "body",
         "color": "#64748b",
@@ -86,7 +87,7 @@
     },
     {
       "type": "text",
-      "data_ref": "$.short_text",
+      "text": { "$": "$.short_text" },
       "properties": {
         "font": "body",
         "color": "#64748b",
@@ -96,8 +97,8 @@
     },
     {
       "type": "text",
+      "text": "Table Overflow Test",
       "properties": {
-        "text": "Table Overflow Test",
         "font": "heading",
         "color": "#1a202c",
         "align": "left",
@@ -106,7 +107,7 @@
     },
     {
       "type": "table",
-      "data_ref": "$.platform_table"
+      "table": { "$": "$.platform_table" }
     }
   ]
 }

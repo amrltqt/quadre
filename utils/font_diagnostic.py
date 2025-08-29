@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Font Diagnostic Tool for EZ Pillow
+Font Diagnostic Tool for NADA
 
 This utility helps diagnose font availability on different systems and provides
 guidance for font configuration using environment variables.
@@ -9,7 +9,6 @@ guidance for font configuration using environment variables.
 import os
 import sys
 import platform
-from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 
@@ -20,7 +19,7 @@ def get_system_info():
         "release": platform.release(),
         "machine": platform.machine(),
         "python_version": platform.python_version(),
-        "pil_version": Image.__version__
+        "pil_version": Image.__version__,
     }
 
 
@@ -35,12 +34,12 @@ def find_common_font_directories():
             "/Library/Fonts/",
             "/usr/local/share/fonts/",
             "/opt/homebrew/share/fonts/",
-            os.path.expanduser("~/Library/Fonts/")
+            os.path.expanduser("~/Library/Fonts/"),
         ]
     elif system == "Windows":
         directories = [
             "C:/Windows/Fonts/",
-            os.path.expanduser("~/AppData/Local/Microsoft/Windows/Fonts/")
+            os.path.expanduser("~/AppData/Local/Microsoft/Windows/Fonts/"),
         ]
     else:  # Linux and others
         directories = [
@@ -49,7 +48,7 @@ def find_common_font_directories():
             "/usr/share/fonts/truetype/",
             "/usr/share/fonts/TTF/",
             os.path.expanduser("~/.fonts/"),
-            os.path.expanduser("~/.local/share/fonts/")
+            os.path.expanduser("~/.local/share/fonts/"),
         ]
 
     # Filter existing directories
@@ -63,7 +62,7 @@ def find_common_font_directories():
 
 def scan_font_files(directories):
     """Scan directories for font files."""
-    font_extensions = {'.ttf', '.ttc', '.otf', '.woff', '.woff2'}
+    font_extensions = {".ttf", ".ttc", ".otf", ".woff", ".woff2"}
     found_fonts = {}
 
     for directory in directories:
@@ -87,7 +86,7 @@ def test_font_loading(font_path, sizes=[12, 18, 24]):
     results = {}
     for size in sizes:
         try:
-            font = ImageFont.truetype(font_path, size)
+            _font = ImageFont.truetype(font_path, size)
             results[size] = "✓"
         except Exception as e:
             results[size] = f"✗ {str(e)[:50]}"
@@ -95,47 +94,42 @@ def test_font_loading(font_path, sizes=[12, 18, 24]):
 
 
 def find_recommended_fonts():
-    """Find recommended fonts for EZ Pillow."""
+    """Find recommended fonts for NADA."""
     system = platform.system()
 
     if system == "Darwin":  # macOS
         recommended = {
             "Helvetica": [
                 "/System/Library/Fonts/Helvetica.ttc",
-                "/Library/Fonts/Helvetica.ttf"
+                "/Library/Fonts/Helvetica.ttf",
             ],
-            "Arial": [
-                "/Library/Fonts/Arial.ttf",
-                "/System/Library/Fonts/Arial.ttf"
-            ],
+            "Arial": ["/Library/Fonts/Arial.ttf", "/System/Library/Fonts/Arial.ttf"],
             "San Francisco": [
                 "/System/Library/Fonts/SFNS.ttf",
-                "/System/Library/Fonts/SFNSDisplay.ttf"
+                "/System/Library/Fonts/SFNSDisplay.ttf",
             ],
             "DejaVu Sans": [
                 "/usr/local/share/fonts/DejaVuSans.ttf",
-                "/opt/homebrew/share/fonts/DejaVuSans.ttf"
-            ]
+                "/opt/homebrew/share/fonts/DejaVuSans.ttf",
+            ],
         }
     elif system == "Windows":
         recommended = {
             "Arial": ["C:/Windows/Fonts/arial.ttf"],
             "Calibri": ["C:/Windows/Fonts/calibri.ttf"],
             "Segoe UI": ["C:/Windows/Fonts/segoeui.ttf"],
-            "Verdana": ["C:/Windows/Fonts/verdana.ttf"]
+            "Verdana": ["C:/Windows/Fonts/verdana.ttf"],
         }
     else:  # Linux
         recommended = {
             "DejaVu Sans": [
                 "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-                "/usr/share/fonts/TTF/DejaVuSans.ttf"
+                "/usr/share/fonts/TTF/DejaVuSans.ttf",
             ],
             "Liberation Sans": [
                 "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"
             ],
-            "Ubuntu": [
-                "/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf"
-            ]
+            "Ubuntu": ["/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf"],
         }
 
     available_fonts = {}
@@ -149,14 +143,14 @@ def find_recommended_fonts():
 
 
 def test_ez_pillow_font_loading():
-    """Test the actual EZ Pillow font loading function."""
+    """Test the NADA font loading function (same API)."""
     try:
         # Add src to path
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        src_dir = os.path.join(script_dir, '..', 'src')
+        src_dir = os.path.join(script_dir, "..", "src")
         sys.path.insert(0, src_dir)
 
-        from ezp.components.config import load_font
+        from nada.components.config import load_font
 
         sizes = [20, 24, 30, 36, 42]
         results = {}
@@ -164,14 +158,14 @@ def test_ez_pillow_font_loading():
         for size in sizes:
             try:
                 font = load_font(size, False)
-                font_name = getattr(font, 'path', 'Default PIL Font')
+                font_name = getattr(font, "path", "Default PIL Font")
                 results[size] = f"✓ {font_name}"
             except Exception as e:
                 results[size] = f"✗ {str(e)}"
 
         return results
     except ImportError as e:
-        return {"error": f"Could not import EZ Pillow config: {e}"}
+        return {"error": f"Could not import NADA config: {e}"}
 
 
 def create_font_test_image(font_path, output_path="font_test.png"):
@@ -189,10 +183,14 @@ def create_font_test_image(font_path, output_path="font_test.png"):
         for size in sizes:
             try:
                 font = ImageFont.truetype(font_path, size)
-                draw.text((50, y_pos), f"Size {size}: {test_text}", font=font, fill="black")
+                draw.text(
+                    (50, y_pos), f"Size {size}: {test_text}", font=font, fill="black"
+                )
                 y_pos += size + 10
             except Exception as e:
-                draw.text((50, y_pos), f"Size {size}: Error - {str(e)[:50]}", fill="red")
+                draw.text(
+                    (50, y_pos), f"Size {size}: Error - {str(e)[:50]}", fill="red"
+                )
                 y_pos += 25
 
         # Add font info
@@ -226,7 +224,7 @@ macOS Font Installation Guide:
    - Copy .ttf files to ~/Library/Fonts/ or /Library/Fonts/
 
 4. Set custom font path (recommended):
-   export EZP_FONT_PATH="/Library/Fonts/DejaVuSans.ttf"
+   export nada_FONT_PATH="/Library/Fonts/DejaVuSans.ttf"
    # Add to your ~/.zshrc or ~/.bash_profile
 """
     elif system == "Windows":
@@ -240,7 +238,7 @@ Windows Font Installation Guide:
 4. Or copy to C:/Windows/Fonts/
 
 5. Set custom font path in environment variables:
-   set EZP_FONT_PATH=C:/Windows/Fonts/DejaVuSans.ttf
+   set nada_FONT_PATH=C:/Windows/Fonts/DejaVuSans.ttf
 """
     else:  # Linux
         return """
@@ -263,13 +261,13 @@ Manual installation:
 3. Run: fc-cache -fv
 
 Set custom font path:
-export EZP_FONT_PATH="/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+export nada_FONT_PATH="/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 """
 
 
 def main():
     """Main diagnostic function."""
-    print("EZ Pillow Font Diagnostic Tool")
+    print("NADA Font Diagnostic Tool")
     print("=" * 50)
     print()
 
@@ -282,15 +280,15 @@ def main():
 
     # Environment variables
     print("Environment Variables:")
-    custom_font = os.environ.get('EZP_FONT_PATH')
+    custom_font = os.environ.get("nada_FONT_PATH")
     if custom_font:
-        print(f"  EZP_FONT_PATH: {custom_font}")
+        print(f"  nada_FONT_PATH: {custom_font}")
         if os.path.exists(custom_font):
             print("  ✓ Custom font path exists")
         else:
             print("  ✗ Custom font path does not exist")
     else:
-        print("  EZP_FONT_PATH: Not set")
+        print("  nada_FONT_PATH: Not set")
     print()
 
     # Font directories
@@ -315,8 +313,8 @@ def main():
         print("  ✗ No recommended fonts found")
     print()
 
-    # Test EZ Pillow font loading
-    print("EZ Pillow Font Loading Test:")
+    # Test NADA font loading
+    print("NADA Font Loading Test:")
     ez_results = test_ez_pillow_font_loading()
     if "error" in ez_results:
         print(f"  ✗ {ez_results['error']}")
@@ -343,7 +341,7 @@ def main():
         best_font = list(recommended.values())[0]
         print("Creating font test image...")
         result = create_font_test_image(best_font)
-        if result.endswith('.png'):
+        if result.endswith(".png"):
             print(f"  ✓ Test image saved: {result}")
         else:
             print(f"  ✗ {result}")
@@ -360,12 +358,14 @@ def main():
         print("  ✓ Custom font path is configured and working")
     elif recommended:
         best_font_path = list(recommended.values())[0]
-        print(f"  → Set environment variable: export EZP_FONT_PATH='{best_font_path}'")
+        print(f"  → Set environment variable: export nada_FONT_PATH='{best_font_path}'")
     else:
         print("  → Install recommended fonts for your system")
         print("  → Use the installation guide above")
 
-    print("  → Test font loading with: python -c \"from ezp.components.config import load_font; print(load_font(24))\"")
+    print(
+        '  → Test font loading with: python -c "from nada.components.config import load_font; print(load_font(24))"'
+    )
 
 
 if __name__ == "__main__":

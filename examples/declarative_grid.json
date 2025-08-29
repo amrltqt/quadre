@@ -3,7 +3,7 @@
   "data": {
     "header": {
       "title": "Grid Layout Demo",
-      "date_note": "Disposition en grille avec références aux données"
+      "date_note": "Grid layout with data references"
     },
     "quarterly_kpis": [
       { "title": "Q1 Revenue", "value": "1,234k€", "delta": { "pct": 25 } },
@@ -17,18 +17,19 @@
   "layout": [
     {
       "type": "title",
-      "data_ref": "$.header"
+      "title": { "$": "$.header.title" },
+      "date_note": { "$": "$.header.date_note" }
     },
     {
       "type": "grid",
       "properties": { "columns": 3, "gap": 20 },
       "children": [
-        { "type": "kpi_card", "data_ref": "$.quarterly_kpis[0]" },
-        { "type": "kpi_card", "data_ref": "$.quarterly_kpis[1]" },
-        { "type": "kpi_card", "data_ref": "$.quarterly_kpis[2]" },
-        { "type": "kpi_card", "data_ref": "$.quarterly_kpis[3]" },
-        { "type": "kpi_card", "data_ref": "$.quarterly_kpis[4]" },
-        { "type": "kpi_card", "data_ref": "$.quarterly_kpis[5]" }
+        { "type": "kpi_card", "title": {"$": "$.quarterly_kpis[0].title"}, "value": {"$": "$.quarterly_kpis[0].value"}, "delta": {"$": "$.quarterly_kpis[0].delta"} },
+        { "type": "kpi_card", "title": {"$": "$.quarterly_kpis[1].title"}, "value": {"$": "$.quarterly_kpis[1].value"}, "delta": {"$": "$.quarterly_kpis[1].delta"} },
+        { "type": "kpi_card", "title": {"$": "$.quarterly_kpis[2].title"}, "value": {"$": "$.quarterly_kpis[2].value"}, "delta": {"$": "$.quarterly_kpis[2].delta"} },
+        { "type": "kpi_card", "title": {"$": "$.quarterly_kpis[3].title"}, "value": {"$": "$.quarterly_kpis[3].value"}, "delta": {"$": "$.quarterly_kpis[3].delta"} },
+        { "type": "kpi_card", "title": {"$": "$.quarterly_kpis[4].title"}, "value": {"$": "$.quarterly_kpis[4].value"}, "delta": {"$": "$.quarterly_kpis[4].delta"} },
+        { "type": "kpi_card", "title": {"$": "$.quarterly_kpis[5].title"}, "value": {"$": "$.quarterly_kpis[5].value"}, "delta": {"$": "$.quarterly_kpis[5].delta"} }
       ]
     }
   ]

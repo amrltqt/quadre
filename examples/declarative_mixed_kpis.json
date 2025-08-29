@@ -1,0 +1,270 @@
+{
+    "canvas": {
+        "height": "auto"
+    },
+    "data": {
+        "perf": {
+            "title": "Total Revenue",
+            "value": "4,567k€",
+            "delta": {
+                "pct": 32,
+                "vs": "3,1k€"
+            }
+        },
+        "comparison_table": {
+            "headers": [
+                "Product",
+                "Price",
+                "Features",
+                "Rating",
+                "Market Share"
+            ],
+            "rows": [
+                [
+                    "Product A",
+                    "€299",
+                    "Advanced",
+                    "4.8/5",
+                    "35.2%"
+                ],
+                [
+                    "Product B",
+                    "€199",
+                    "Standard",
+                    "4.2/5",
+                    "28.7%"
+                ],
+                [
+                    "Product C",
+                    "€399",
+                    "Premium",
+                    "4.9/5",
+                    "21.5%"
+                ],
+                [
+                    "Product D",
+                    "€149",
+                    "Basic",
+                    "3.9/5",
+                    "14.6%"
+                ]
+            ]
+        }
+    },
+    "layout": [
+        {
+            "type": "text",
+            "text": "Awesome dashboard KPIs",
+            "properties": {
+                "font": "heading"
+            }
+        },
+        {
+            "type": "row",
+            "children": [
+                {
+                    "type": "kpi_card",
+                    "title": {
+                        "$": "$.perf.title"
+                    },
+                    "value": {
+                        "$": "$.perf.value"
+                    },
+                    "delta": {
+                        "$": "$.perf.delta"
+                    }
+                },
+                {
+                    "type": "kpi_card",
+                    "title": {
+                        "$": "$.perf.title"
+                    },
+                    "value": {
+                        "$": "$.perf.value"
+                    },
+                    "delta": {
+                        "$": "$.perf.delta"
+                    }
+                },
+                {
+                    "type": "kpi_card",
+                    "title": {
+                        "$": "$.perf.title"
+                    },
+                    "value": {
+                        "$": "$.perf.value"
+                    },
+                    "delta": {
+                        "$": "$.perf.delta"
+                    }
+                },
+                {
+                    "type": "kpi_card",
+                    "title": {
+                        "$": "$.perf.title"
+                    },
+                    "value": {
+                        "$": "$.perf.value"
+                    },
+                    "delta": {
+                        "$": "$.perf.delta"
+                    }
+                },
+                {
+                    "type": "kpi_card",
+                    "title": {
+                        "$": "$.perf.title"
+                    },
+                    "value": {
+                        "$": "$.perf.value"
+                    },
+                    "delta": {
+                        "$": "$.perf.delta"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "table",
+            "table": {
+                "$": "$.comparison_table"
+            }
+        },
+        {
+            "type": "text",
+            "text": "Informations"
+        },
+        {
+            "type": "row",
+            "children": [
+                {
+                    "type": "kpi_card",
+                    "title": {
+                        "$": "$.perf.title"
+                    },
+                    "value": {
+                        "$": "$.perf.value"
+                    },
+                    "delta": {
+                        "$": "$.perf.delta"
+                    }
+                },
+                {
+                    "type": "column",
+                    "children": [
+                        {
+                            "type": "kpi_card",
+                            "title": {
+                                "$": "$.perf.title"
+                            },
+                            "value": {
+                                "$": "$.perf.value"
+                            },
+                            "delta": {
+                                "$": "$.perf.delta"
+                            }
+                        },
+                        {
+                            "type": "kpi_card",
+                            "title": {
+                                "$": "$.perf.title"
+                            },
+                            "value": {
+                                "$": "$.perf.value"
+                            },
+                            "delta": {
+                                "$": "$.perf.delta"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "column",
+                    "children": [
+                        {
+                            "type": "kpi_card",
+                            "title": {
+                                "$": "$.perf.title"
+                            },
+                            "value": {
+                                "$": "$.perf.value"
+                            },
+                            "delta": {
+                                "$": "$.perf.delta"
+                            }
+                        },
+                        {
+                            "type": "kpi_card",
+                            "title": {
+                                "$": "$.perf.title"
+                            },
+                            "value": {
+                                "$": "$.perf.value"
+                            },
+                            "delta": {
+                                "$": "$.perf.delta"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "text": "Finally"
+        },
+        {
+            "type": "row",
+            "children": [
+                {
+                    "type": "kpi_card",
+                    "title": {
+                        "$": "$.perf.title"
+                    },
+                    "value": {
+                        "$": "$.perf.value"
+                    },
+                    "delta": {
+                        "$": "$.perf.delta"
+                    }
+                },
+                {
+                    "type": "kpi_card",
+                    "title": {
+                        "$": "$.perf.title"
+                    },
+                    "value": {
+                        "$": "$.perf.value"
+                    },
+                    "delta": {
+                        "$": "$.perf.delta"
+                    }
+                },
+                {
+                    "type": "kpi_card",
+                    "title": {
+                        "$": "$.perf.title"
+                    },
+                    "value": {
+                        "$": "$.perf.value"
+                    },
+                    "delta": {
+                        "$": "$.perf.delta"
+                    }
+                },
+                {
+                    "type": "kpi_card",
+                    "title": {
+                        "$": "$.perf.title"
+                    },
+                    "value": {
+                        "$": "$.perf.value"
+                    },
+                    "delta": {
+                        "$": "$.perf.delta"
+                    }
+                }
+            ]
+        }
+    ]
+}

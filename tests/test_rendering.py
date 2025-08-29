@@ -5,8 +5,8 @@ import hashlib
 
 from PIL import Image
 
-from ezp.flex.renderer import render_dashboard_with_flex
-from ezp.components.config import DIMENSIONS
+from nada.flex.runner import render_dashboard_with_flex
+from nada.components.config import DIMENSIONS
 
 
 def _hash_png(path: Path) -> str:
@@ -111,4 +111,3 @@ def test_fixed_height_mode(tmp_path):
     w, h = im.size
     assert w == DIMENSIONS.WIDTH
     assert h == 900
-

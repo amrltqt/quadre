@@ -1,23 +1,25 @@
 {
   "canvas": { "height": "auto" },
-  "title": "Complex Declarative Layout Demo",
-  "date_note": "Layout complexe avec table et références par clé",
-  "top_kpis": [
-    {"title": "Total Revenue", "value": "4,567k€", "delta": {"pct": 32}},
-    {"title": "Active Users", "value": "1,234k", "delta": {"pct": 15}},
-    {"title": "Conversion Rate", "value": "6.8%", "delta": {"pct": 12}}
-  ],
-  "performance_metrics": [
-    {"title": "Page Load Time", "value": "1.2s", "delta": {"pct": -18}},
-    {"title": "Error Rate", "value": "0.03%", "delta": {"pct": -45}},
-    {"title": "Uptime", "value": "99.97%", "delta": {"pct": 2}}
-  ],
-  "platform_data": [
-    ["E-commerce", "2,890k€ (+28%)", "2,234k€ (+25%)", "-156k€ (+8%)", "534k€ (+35%)", "278k€ (+12%)"],
-    ["Mobile App", "1,234k€ (+22%)", "945k€ (+20%)", "-89k€ (+15%)", "267k€ (+28%)", "156k€ (+18%)"],
-    ["B2B Portal", "443k€ (+18%)", "329k€ (+16%)", "-34k€ (+22%)", "98k€ (+25%)", "67k€ (+15%)"]
-  ],
-  "summary_text": "💼 All channels showing strong growth across key metrics",
+  "data": {
+    "title": "Complex Declarative Layout Demo",
+    "date_note": "Complex layout with table and key-based references",
+    "top_kpis": [
+      {"title": "Total Revenue", "value": "4,567k€", "delta": {"pct": 32}},
+      {"title": "Active Users", "value": "1,234k", "delta": {"pct": 15}},
+      {"title": "Conversion Rate", "value": "6.8%", "delta": {"pct": 12}}
+    ],
+    "performance_metrics": [
+      {"title": "Page Load Time", "value": "1.2s", "delta": {"pct": -18}},
+      {"title": "Error Rate", "value": "0.03%", "delta": {"pct": -45}},
+      {"title": "Uptime", "value": "99.97%", "delta": {"pct": 2}}
+    ],
+    "platform_data": [
+      ["E-commerce", "2,890k€ (+28%)", "2,234k€ (+25%)", "-156k€ (+8%)", "534k€ (+35%)", "278k€ (+12%)"],
+      ["Mobile App", "1,234k€ (+22%)", "945k€ (+20%)", "-89k€ (+15%)", "267k€ (+28%)", "156k€ (+18%)"],
+      ["B2B Portal", "443k€ (+18%)", "329k€ (+16%)", "-34k€ (+22%)", "98k€ (+25%)", "67k€ (+15%)"]
+    ],
+    "summary_text": "💼 All channels showing strong growth across key metrics"
+  },
   "layout": [
     {
       "type": "row",
@@ -25,15 +27,17 @@
       "children": [
         {
           "type": "kpi_card",
-          "data_ref": "$.top_kpis[0]",
+          "title": {"$": "$.top_kpis[0].title"},
+          "value": {"$": "$.top_kpis[0].value"},
+          "delta": {"$": "$.top_kpis[0].delta"},
           "properties": {"featured": true}
         },
         {
           "type": "column",
           "properties": {"gap": 15},
           "children": [
-            {"type": "kpi_card", "data_ref": "$.top_kpis[1]"},
-            {"type": "kpi_card", "data_ref": "$.top_kpis[2]"}
+            {"type": "kpi_card", "title": {"$": "$.top_kpis[1].title"}, "value": {"$": "$.top_kpis[1].value"}, "delta": {"$": "$.top_kpis[1].delta"}},
+            {"type": "kpi_card", "title": {"$": "$.top_kpis[2].title"}, "value": {"$": "$.top_kpis[2].value"}, "delta": {"$": "$.top_kpis[2].delta"}}
           ]
         }
       ]
@@ -44,8 +48,8 @@
     },
     {
       "type": "text",
+      "text": "Performance Metrics",
       "properties": {
-        "text": "Performance Metrics",
         "font": "heading",
         "color": "#1a202c",
         "align": "left",
@@ -56,9 +60,9 @@
       "type": "row",
       "properties": {"gap": 20},
       "children": [
-        {"type": "kpi_card", "data_ref": "$.performance_metrics[0]"},
-        {"type": "kpi_card", "data_ref": "$.performance_metrics[1]"},
-        {"type": "kpi_card", "data_ref": "$.performance_metrics[2]"}
+        {"type": "kpi_card", "title": {"$": "$.performance_metrics[0].title"}, "value": {"$": "$.performance_metrics[0].value"}, "delta": {"$": "$.performance_metrics[0].delta"}},
+        {"type": "kpi_card", "title": {"$": "$.performance_metrics[1].title"}, "value": {"$": "$.performance_metrics[1].value"}, "delta": {"$": "$.performance_metrics[1].delta"}},
+        {"type": "kpi_card", "title": {"$": "$.performance_metrics[2].title"}, "value": {"$": "$.performance_metrics[2].value"}, "delta": {"$": "$.performance_metrics[2].delta"}}
       ]
     },
     {
@@ -67,8 +71,8 @@
     },
     {
       "type": "text",
+      "text": "Platform Performance Breakdown",
       "properties": {
-        "text": "Platform Performance Breakdown",
         "font": "heading",
         "color": "#1a202c",
         "align": "left",
@@ -77,7 +81,7 @@
     },
     {
       "type": "table",
-      "data_ref": "$.platform_data"
+      "table": { "$": "$.platform_data" }
     },
     {
       "type": "spacer",
@@ -85,7 +89,7 @@
     },
     {
       "type": "text",
-      "data_ref": "$.summary_text",
+      "text": { "$": "$.summary_text" },
       "properties": {
         "font": "body",
         "color": "#64748b",

@@ -1,25 +1,25 @@
 [build-system]
-requires = ["hatchling"]
+requires = [ "hatchling" ]
 build-backend = "hatchling.build"
 
+
 [project]
-name = "ez-pillow"
+name = "nada"
 version = "0.1.0"
 description = "A Python CLI tool that generates beautiful dashboard images from JSON data using PIL/Pillow"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = [
-    "pillow>=11.3.0",
-    "pytest>=8.4.1",
-]
+dependencies = [ "pillow>=11.3.0", "pydantic>=2.7,<3" ]
+
 
 [project.scripts]
-ez-pillow = "ezp.main:main"
+nada = "nada.__main__:main"
+nada-validate = "nada.validator:main"
+
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/ezp"]
+packages = [ "src/ndata" ]
+
 
 [dependency-groups]
-dev = [
-    "pytest>=8.4.1",
-]
+dev = [ "pytest>=8.4.1", "ruff>=0.12.11" ]

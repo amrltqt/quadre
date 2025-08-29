@@ -1,6 +1,4 @@
-import os
 import hashlib
-import io
 import pytest
 from PIL import ImageFont
 
@@ -11,7 +9,7 @@ def force_default_fonts(monkeypatch):
 
     This avoids cross-platform font differences impacting rendering output.
     """
-    from ezp.components.config import FONTS
+    from nada.components.config import FONTS
 
     default = ImageFont.load_default()
     monkeypatch.setattr(FONTS, "H1", default, raising=False)
@@ -30,4 +28,3 @@ def sha256_file(path: str) -> str:
         for chunk in iter(lambda: f.read(8192), b""):
             h.update(chunk)
     return h.hexdigest()
-
