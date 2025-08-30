@@ -1,6 +1,6 @@
 [project]
 name = "quadre"
-version = "0.1.0"
+version = "0.1.1"
 description = "A Python CLI tool that generates beautiful dashboard images from JSON data using PIL/Pillow"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -29,7 +29,7 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = [ "src/quadre" ]
-include = [ "src/quadre/theme/*.json", "src/quadre/py.typed" ]
+include = [ "src/quadre/theme/*.json", "src/quadre/py.typed", "LICENSE" ]
 
 
 [tool.hatch.build.targets.sdist]
@@ -37,7 +37,8 @@ include = [
 "src/quadre",
 "src/quadre/theme/*.json",
 "src/quadre/py.typed",
-"README.md"
+"README.md",
+"LICENSE"
 ]
 
 
