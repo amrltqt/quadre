@@ -5,9 +5,7 @@ description = "A Python CLI tool that generates beautiful dashboard images from 
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [ "pillow>=11.3.0", "pydantic>=2.7,<3" ]
-classifiers = [
-  "Typing :: Typed",
-]
+classifiers = [ "Typing :: Typed" ]
 
 
 [project.scripts]
@@ -26,8 +24,13 @@ include = [ "src/quadre/theme/*.json", "src/quadre/py.typed" ]
 
 
 [tool.hatch.build.targets.sdist]
-include = [ "src/quadre", "src/quadre/theme/*.json", "src/quadre/py.typed", "README.md" ]
+include = [
+"src/quadre",
+"src/quadre/theme/*.json",
+"src/quadre/py.typed",
+"README.md"
+]
 
 
 [dependency-groups]
-dev = [ "pytest>=8.4.1", "ruff>=0.12.11" ]
+dev = [ "pytest>=8.4.1", "ruff>=0.12.11", "twine>=6.1.0" ]
