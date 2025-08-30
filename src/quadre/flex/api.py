@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field, replace
-from typing import Any, Dict, List, Optional, Sequence, Union
+from typing import Any, Dict, List, Optional, Sequence, Union, Self
 
 # Public, typed builder API that compiles to the declarative JSON
 # accepted by the validator + adapter pipeline.
@@ -36,65 +36,65 @@ class Component:
     )
 
     # ----- Common fluent helpers (return new copies) -----
-    def prop(self, name: str, value: Any) -> "Component":
+    def prop(self, name: str, value: Any) -> Self:
         p = dict(self._props)
         p[name] = value
         return replace(self, _props=p)
 
-    def props(self, **kwargs: Any) -> "Component":
+    def props(self, **kwargs: Any) -> Self:
         p = dict(self._props)
         p.update(kwargs)
         return replace(self, _props=p)
 
     # Spacing
-    def gap(self, px: int) -> "Component":
+    def gap(self, px: int) -> Self:
         return self.prop("gap", int(px))
 
-    def padding(self, px: int) -> "Component":
+    def padding(self, px: int) -> Self:
         return self.prop("padding", int(px))
 
-    def margin_top(self, px: int) -> "Component":
+    def margin_top(self, px: int) -> Self:
         return self.prop("margin_top", int(px))
 
-    def margin_bottom(self, px: int) -> "Component":
+    def margin_bottom(self, px: int) -> Self:
         return self.prop("margin_bottom", int(px))
 
     # Background (containers)
-    def bg_radius(self, r: int) -> "Component":
+    def bg_radius(self, r: int) -> Self:
         return self.prop("bg_radius", int(r))
 
-    def bg_fill(self, color: Any) -> "Component":
+    def bg_fill(self, color: Any) -> Self:
         return self.prop("bg_fill", color)
 
-    def bg_outline(self, color: Any) -> "Component":
+    def bg_outline(self, color: Any) -> Self:
         return self.prop("bg_outline", color)
 
-    def bg_outline_width(self, px: int) -> "Component":
+    def bg_outline_width(self, px: int) -> Self:
         return self.prop("bg_outline_width", int(px))
 
-    def shadow(self, on: bool = True) -> "Component":
+    def shadow(self, on: bool = True) -> Self:
         return self.prop("shadow", bool(on))
 
     # Flex cross/main alignment (containers)
-    def align_items(self, v: str) -> "Component":
+    def align_items(self, v: str) -> Self:
         return self.prop("align_items", str(v))
 
-    def justify_content(self, v: str) -> "Component":
+    def justify_content(self, v: str) -> Self:
         return self.prop("justify_content", str(v))
 
     # Size hints when used as a child of a container
-    def grow(self, ratio: float) -> "Component":
+    def grow(self, ratio: float) -> Self:
         """For children in a Row: set width_ratio (0 disables growth)."""
         return self.prop("width_ratio", float(ratio))
 
-    def no_grow(self) -> "Component":
+    def no_grow(self) -> Self:
         return self.grow(0)
 
-    def fill_remaining(self, on: bool = True) -> "Component":
+    def fill_remaining(self, on: bool = True) -> Self:
         """For children in a Column: ask to stretch along the column."""
         return self.prop("fill_remaining", bool(on))
 
-    def height(self, px: int) -> "Component":
+    def height(self, px: int) -> Self:
         """For children in a Column: suggest a fixed height (basis)."""
         return self.prop("height", int(px))
 
