@@ -1,16 +1,48 @@
 from .engine import (
     FlexContainer,
     Widget,
-    TextWidget,
     FixedBox,
 )
-from .widgets import KPIWidget, TableWidget
+from .widgets import KPIWidget, TableWidget, TextWidget
+from .api import (
+    dref,
+    Doc,
+    doc,
+    make_doc,
+    Text,
+    Title,
+    KPI,
+    Table,
+    Spacer,
+    Image,
+    Progress,
+    StatusBadge,
+    Row,
+    Column,
+    Grid,
+)
 
 __all__ = [
     "FlexContainer",
     "Widget",
-    "TextWidget",
     "FixedBox",
+    "TextWidget",
     "KPIWidget",
     "TableWidget",
+    # Typed builder API
+    "dref",
+    "Doc",
+    "doc",
+    "make_doc",
+    "Text",
+    "Title",
+    "KPI",
+    "Table",
+    "Spacer",
+    "Image",
+    "Progress",
+    "StatusBadge",
+    "Row",
+    "Column",
+    "Grid",
 ]

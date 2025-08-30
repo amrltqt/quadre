@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from typing import Dict, Any, Callable, Optional
 
-from .engine import FlexContainer, TextWidget
+from .engine import FlexContainer
+from .widgets import TextWidget
 from .helpers import (
     _apply_container_defaults,
     _text_from_props,
@@ -157,10 +158,14 @@ def _build_row_or_column(
     cont = FlexContainer(
         direction="row" if is_row else "column", gap=gap, align_items="stretch"
     )
-    cont = _apply_container_defaults(cont, {"gap": gap})
+    # Apply full properties bag so callers can style containers (padding, bg, shadow, etc.)
+    merged = dict(props)
+    merged.setdefault("gap", gap)
+    cont = _apply_container_defaults(cont, merged)
     for child in node.get("children", []) or []:
         w = builder(child)
         grow: float = 0.0
+        shrink: float = 1.0
         basis: Optional[int] = None
         cprops = _norm_props(child.get("properties", {}) if isinstance(child, dict) else {})
         ratio = cprops.get("width_ratio")
@@ -170,6 +175,11 @@ def _build_row_or_column(
         if is_row:
             if isinstance(ratio, (int, float)):
                 grow = float(ratio)
+                # If an item explicitly opts out of growth (width_ratio=0),
+                # do not shrink it when space is tight. This keeps intrinsic
+                # width for things like short text labels next to KPIs.
+                if grow == 0.0:
+                    shrink = 0.0
             else:
                 grow = 1.0
         else:
@@ -179,7 +189,7 @@ def _build_row_or_column(
                     basis = int(height_prop)
                 except Exception:
                     basis = None
-        cont.add(w, grow=grow, basis=basis)
+        cont.add(w, grow=grow, shrink=shrink, basis=basis)
     return cont
 
 
@@ -198,6 +208,7 @@ def _build_grid(node: Dict[str, Any], props: Dict[str, Any], resolve: ResolveFn,
 
 def build_layout_from_declarative(data: Dict[str, Any]) -> FlexContainer:
     defs = data.get("layout", [])
+    canvas_cfg = data.get("canvas") or {}
 
     def _resolve_field(v: Any) -> Any:
         return resolve_field(data, v)
@@ -242,6 +253,31 @@ def build_layout_from_declarative(data: Dict[str, Any]) -> FlexContainer:
         padding=DIMENSIONS.PADDING,
         align_items="stretch",
     )
+    # Allow document-level canvas options to influence the root container spacing
+    try:
+        if isinstance(canvas_cfg, dict):
+            if canvas_cfg.get("padding") is not None:
+                root.padding = int(canvas_cfg.get("padding"))
+            if canvas_cfg.get("gap") is not None:
+                root.gap = int(canvas_cfg.get("gap"))
+    except Exception:
+        # ignore bad values; validator ignores extras in canvas
+        pass
+
+    # Optional outer margins at the top/bottom of the document
+    def _int_or_zero(v: Any) -> int:
+        try:
+            return int(v)
+        except Exception:
+            return 0
+
+    top_margin = _int_or_zero(canvas_cfg.get("top_margin") or canvas_cfg.get("margin_top"))
+    bottom_margin = _int_or_zero(canvas_cfg.get("bottom_margin") or canvas_cfg.get("margin_bottom"))
+
+    if top_margin > 0:
+        root.add(Spacer(top_margin))
     for comp in defs:
         root.add(build_node(comp))
+    if bottom_margin > 0:
+        root.add(Spacer(bottom_margin))
     return root

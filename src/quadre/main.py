@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 """
-quadre — Not A Dashboard App (Main Entry Point)
+quadre — Library entry points (no CLI)
 
-A Python CLI that generates static dashboard PNGs from JSON using Pillow.
-Built on a lightweight Flex layout engine with reusable components.
+High-level functions for rendering dashboards from Python.
 """
 
-import argparse
 import json
 import sys
 
@@ -78,83 +76,8 @@ def load_data_from_json(json_path: str) -> dict:
         sys.exit(1)
 
 
-def main():
-    """Main entry point for dashboard generation."""
-    parser = argparse.ArgumentParser(
-        description="Generate a dashboard PNG from JSON data using modular components",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  # Named arguments
-  uv run -m quadre.main -i data.json
-  uv run -m quadre.main -i data.json -o my_dashboard.png
-  uv run -m quadre.main --input data.json --output result.png
-
-  # Positional arguments
-  uv run -m quadre.main data.json output.png
-        """,
-    )
-
-    parser.add_argument(
-        "input_file",
-        nargs="?",
-        type=str,
-        help="Input JSON file (positional argument for Docker compatibility)",
-    )
-
-    parser.add_argument(
-        "output_file",
-        nargs="?",
-        type=str,
-        help="Output PNG file (positional argument for Docker compatibility)",
-    )
-
-    parser.add_argument(
-        "-i", "--input", type=str, help="Input JSON file containing dashboard data"
-    )
-
-    parser.add_argument(
-        "-o",
-        "--output",
-        type=str,
-        default="dashboard.png",
-        help="Output PNG file (default: dashboard.png)",
-    )
-
-    args = parser.parse_args()
-
-    # Determine input and output files (prioritize named args, fallback to positional)
-    input_file = args.input or args.input_file
-    output_file = (
-        args.output
-        if args.output != "dashboard.png"
-        else (args.output_file or args.output)
-    )
-
-    # Validate input file is provided
-    if not input_file:
-        print(
-            "Error: Input file must be provided either as -i/--input or as first positional argument"
-        )
-        parser.print_help()
-        sys.exit(1)
-
-    # Load data from JSON
-    print(f"Loading data from {input_file}...")
-    data = load_data_from_json(input_file)
-
-    # Generate dashboard
-    print("Generating dashboard...")
-    try:
-        output_path = render_dashboard(data, output_file)
-        print(f"Dashboard successfully generated: {output_path}")
-    except Exception as e:
-        print(f"Error generating dashboard: {e}")
-        import traceback
-
-        traceback.print_exc()
-        sys.exit(1)
-
-
-if __name__ == "__main__":
-    main()
+__all__ = [
+    "render_dashboard",
+    "render_dashboard_bytes",
+    "load_data_from_json",
+]

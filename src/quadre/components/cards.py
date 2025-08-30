@@ -7,7 +7,7 @@ All cards follow consistent styling patterns and can be easily customized.
 
 from PIL import ImageDraw
 from typing import Dict, Optional, Any
-from .config import COLORS, FONTS, DIMENSIONS
+from .config import COLORS, FONTS, DIMENSIONS, px
 from .primitives import rounded_rectangle, badge, get_delta_display_info
 
 
@@ -46,9 +46,13 @@ class KPICard:
         self.width = width
 
         # Draw card background
+        # Inset bottom/right by 1px to avoid clipping the stroke when the
+        # widget is rendered inside a tightly clipped layer.
+        x2 = x + max(0, width - 1)
+        y2 = y + max(0, self.height - 1)
         rounded_rectangle(
             draw,
-            (x, y, x + width, y + self.height),
+            (x, y, x2, y2),
             DIMENSIONS.CARD_RADIUS,
             fill=COLORS.CARD_BACKGROUND,
             outline=COLORS.BORDER,
@@ -56,11 +60,12 @@ class KPICard:
         )
 
         # Available width for content (minus padding)
-        content_width = width - 40  # 20px padding on each side
+        pad = px(20)
+        content_width = width - 2 * pad
 
         # Draw title with text wrapping if needed
-        title_x = x + 20
-        title_y = y + 16
+        title_x = x + pad
+        title_y = y + px(16)
         title_text = self._truncate_text(self.title, FONTS.SMALL, content_width)
         draw.text(
             (title_x, title_y),
@@ -70,8 +75,8 @@ class KPICard:
         )
 
         # Draw value with text wrapping if needed
-        value_x = x + 20
-        value_y = y + 50
+        value_x = x + pad
+        value_y = y + px(50)
         value_text = self._truncate_text(self.value, FONTS.NUMBER, content_width)
         draw.text(
             (value_x, value_y), value_text, font=FONTS.NUMBER, fill=COLORS.FOREGROUND
@@ -106,8 +111,8 @@ class KPICard:
 
             if text_parts:
                 delta_text = " ".join(text_parts)
-                badge_x = x + 20
-                badge_y = y + 105
+                badge_x = x + pad
+                badge_y = y + px(105)
                 badge(draw, (badge_x, badge_y), delta_text, variant=variant)
 
     def _truncate_text(self, text: str, font, max_width: int) -> str:
@@ -180,9 +185,11 @@ class SectionCard:
         self.height = height
 
         # Draw card background
+        x2 = x + max(0, width - 1)
+        y2 = y + max(0, height - 1)
         rounded_rectangle(
             draw,
-            (x, y, x + width, y + height),
+            (x, y, x2, y2),
             DIMENSIONS.CARD_RADIUS,
             fill=COLORS.CARD_BACKGROUND,
             outline=COLORS.BORDER,
@@ -190,8 +197,9 @@ class SectionCard:
         )
 
         # Draw title
-        title_x = x + 20
-        title_y = y + 16
+        pad = px(20)
+        title_x = x + pad
+        title_y = y + px(16)
         draw.text(
             (title_x, title_y),
             self.title,
@@ -200,8 +208,8 @@ class SectionCard:
         )
 
         # Draw value
-        value_x = x + 20
-        value_y = y + 50
+        value_x = x + pad
+        value_y = y + px(50)
         draw.text(
             (value_x, value_y), self.value, font=FONTS.NUMBER, fill=COLORS.FOREGROUND
         )
@@ -228,6 +236,6 @@ class SectionCard:
 
             if text_parts:
                 delta_text = " ".join(text_parts)
-                delta_x = x + 20
-                delta_y = y + height - 35
+                delta_x = x + pad
+                delta_y = y + height - px(35)
                 draw.text((delta_x, delta_y), delta_text, font=FONTS.SMALL, fill=color)

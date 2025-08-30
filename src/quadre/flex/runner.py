@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Dict, Any
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFilter
 
 from ..components import COLORS, DIMENSIONS
 from ..components.config import apply_theme, set_scale, reset_scale
@@ -53,8 +53,10 @@ def build_dashboard_image(data: Dict[str, Any]) -> Image.Image:
     max_auto_h = (
         int(canvas_cfg.get("max_height", H_default * 10)) if auto_height else H_default
     )
+    # Default to 0 in auto-height so the image can shrink below the base page
+    # height when no explicit min_height is provided.
     min_auto_h = (
-        int(canvas_cfg.get("min_height", H_default)) if auto_height else H_default
+        int(canvas_cfg.get("min_height", 0)) if auto_height else H_default
     )
 
     # Load validated theme (env var quadre_THEME or bundled default), then allow doc-level overrides
@@ -96,17 +98,27 @@ def build_dashboard_image(data: Dict[str, Any]) -> Image.Image:
     setattr(probe_draw, "_quadre_image", probe_img)
     _, preferred_h = root.measure(probe_draw, W, 10_000_000)
 
+    # Optional default outer margin for auto-height if none specified at canvas level.
+    # This avoids content visually touching the bottom edge while keeping
+    # backward compatibility (explicit canvas margins take precedence).
+    has_canvas_margins = any(
+        k in canvas_cfg for k in ("top_margin", "bottom_margin", "margin_top", "margin_bottom")
+    )
+    default_auto_bottom_margin = 0 if not auto_height else (0 if has_canvas_margins else DIMENSIONS.GAP_MEDIUM)
+
     # Render to a final image object
     if auto_height:
         # Choose final height based on content within bounds
-        final_h = max(min_auto_h, min(preferred_h, max_auto_h))
+        final_h = max(min_auto_h, min(preferred_h + default_auto_bottom_margin, max_auto_h))
         img = Image.new("RGB", (W, final_h), COLORS.BACKGROUND)
         draw = ImageDraw.Draw(img)
         setattr(draw, "_quadre_image", img)
         root.render(draw, 0, 0, W, final_h)
         if scale != 1.0 and downscale:
-            # Downsample to base size with high-quality filter
-            target_h = max(int(final_h / scale), 1)
+            # Downsample to base size with high-quality filter. Use rounding to
+            # avoid systematic 1px cropping when final_h is not an exact
+            # multiple of the scale factor.
+            target_h = max(int(round(final_h / scale)), 1)
             img = img.resize((base_W, target_h), Image.LANCZOS)
         final_img = img
     else:
@@ -123,8 +135,53 @@ def build_dashboard_image(data: Dict[str, Any]) -> Image.Image:
 
         final = off.crop((0, 0, W, H_page)) if off_h != H_page else off
         if scale != 1.0 and downscale:
-            final = final.resize((base_W, int(H_page / scale)), Image.LANCZOS)
+            final = final.resize((base_W, int(round(H_page / scale))), Image.LANCZOS)
         final_img = final
+
+    # Optional unsharp mask to improve perceived text crispness after downscale.
+    # Accepts canvas.sharpen as:
+    #  - bool: True -> mild default
+    #  - float: 0..1 amount
+    #  - dict: { amount?:0..1, radius?:float, percent?:int, threshold?:int }
+    sharpen_val = canvas_cfg.get("sharpen")
+    amount: float = 0.0
+    radius: float | None = None
+    percent: int | None = None
+    threshold: int | None = None
+    try:
+        if isinstance(sharpen_val, dict):
+            raw_amount = sharpen_val.get("amount")
+            amount = float(raw_amount) if raw_amount is not None else 0.3
+            radius = float(sharpen_val.get("radius")) if sharpen_val.get("radius") is not None else None
+            percent = int(sharpen_val.get("percent")) if sharpen_val.get("percent") is not None else None
+            threshold = int(sharpen_val.get("threshold")) if sharpen_val.get("threshold") is not None else None
+        elif isinstance(sharpen_val, bool):
+            amount = 0.3 if sharpen_val else 0.0
+        elif sharpen_val is None:
+            amount = 0.0
+        else:
+            amount = float(sharpen_val)
+        amount = max(0.0, min(1.0, amount))
+    except Exception:
+        amount = 0.0
+    if amount > 0.0 and isinstance(final_img, Image.Image):
+        use_radius = radius if radius is not None else 1.0
+        # If percent not explicitly provided, adapt sharpening strength to scale
+        # so that higher supersampling factors don't over-thin text.
+        if percent is None:
+            # Base curve around 150% at amount=1 and scale=1, reduce with sqrt(scale)
+            use_percent = max(1, int(150 * amount / (max(1.0, scale) ** 0.5)))
+        else:
+            use_percent = int(percent)
+        use_percent = max(1, min(use_percent, 500))
+        # For large scale factors, add a tiny threshold to avoid thinning
+        if threshold is None and scale >= 2.5:
+            use_threshold = 1
+        else:
+            use_threshold = max(0, threshold) if threshold is not None else 0
+        final_img = final_img.filter(
+            ImageFilter.UnsharpMask(radius=use_radius, percent=use_percent, threshold=use_threshold)
+        )
 
     # Always restore scale back to 1x for subsequent runs
     if scale and scale != 1.0:

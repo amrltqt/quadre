@@ -7,7 +7,7 @@ All primitives work with PIL ImageDraw objects and follow consistent styling pat
 
 from PIL import ImageDraw, ImageFont
 from typing import Tuple, Optional
-from .config import COLORS, FONTS, DIMENSIONS
+from .config import COLORS, FONTS, DIMENSIONS, px
 
 
 def rounded_rectangle(
@@ -70,7 +70,7 @@ def badge(
 
     x, y = xy
     text_width = font.getlength(text)
-    padx, pady = 12, 6
+    padx, pady = px(12), px(6)
     radius = DIMENSIONS.BUTTON_RADIUS
     badge_width = int(text_width) + 2 * padx
     badge_height = font.size + 2 * pady

@@ -59,32 +59,34 @@ Notes:
 
 ## Programmatic usage (Python)
 
-Get a Pillow image:
+Prefer the high-level API for most use cases:
+
+```
+from quadre import render, build_image, to_bytes
+
+# File output (default plugin)
+render(doc, path="out.png")
+
+# Multiple outputs
+render(doc, outputs=[
+  {"plugin": "file", "path": "out.webp", "format": "WEBP"},
+  {"plugin": "bytes"},  # returns encoded bytes
+])
+
+# Get a Pillow image or encoded bytes
+img = build_image(doc)
+buf = to_bytes(doc, "PNG")
+```
+
+Advanced: you can still use lower-level functions if you need tighter control:
+
 ```
 from quadre.flex.runner import build_dashboard_image
+from quadre.plugins import dispatch_outputs, image_to_bytes
 
 img = build_dashboard_image(doc)
-```
-
-Encode to bytes without touching disk:
-```
-from quadre.plugins import image_to_bytes
-
+dispatch_outputs(img, doc.get("outputs") or doc.get("output"), default_path="out.png", doc=doc)
 png_bytes = image_to_bytes(img, format="PNG")
-```
-
-Or one-shot helper that renders and returns bytes:
-```
-from quadre.main import render_dashboard_bytes
-
-png_bytes = render_dashboard_bytes(doc)  # PNG by default
-```
-
-Let the renderer handle outputs (default file + extras):
-```
-from quadre.flex.runner import render_dashboard_with_flex
-
-render_dashboard_with_flex(doc, "out.png")
 ```
 
 ## Writing a plugin (example: S3)

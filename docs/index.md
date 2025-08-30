@@ -9,7 +9,8 @@ Read next:
 - Quickstart: docs/quickstart.md
 - Architecture: docs/architecture.md
 - Declarative Layout (JSON): docs/declarative-layout.md
+- Canvas & Rendering: docs/canvas.md
 - Output Plugins: docs/plugins.md
 - Testing & Determinism: docs/testing.md
-- Docker Usage: docs/docker.md
 - Troubleshooting: docs/troubleshooting.md
+- Publishing: docs/publishing.md

@@ -227,7 +227,7 @@ echo "  cd ez-pillow"
 echo "  python utils/font_diagnostic.py"
 echo
 print_info "To generate a dashboard:"
-echo "  uv run -m quadre.main data.json out/dashboard.png"
+echo "  uv run -m quadre.cli render data.json out/dashboard.png"
 
 if [[ -n "$recommended_font" ]]; then
     echo

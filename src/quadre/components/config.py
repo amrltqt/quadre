@@ -241,6 +241,19 @@ _BASE_FONT_SIZES = {
 _CURRENT_SCALE = 1.0
 
 
+def px(value: float | int) -> int:
+    """Scale a pixel value according to current supersampling scale.
+
+    Keeps integer rounding consistent across the codebase so that component
+    paddings and offsets remain proportional when `set_scale()` is active.
+    """
+    try:
+        f = float(value)
+    except Exception:
+        f = 0.0
+    return max(0, int(round(f * _CURRENT_SCALE)))
+
+
 def set_scale(scale: float) -> None:
     """Apply a global scale factor to dimensions and fonts.
 
@@ -269,30 +282,6 @@ def reset_scale() -> None:
     """Reset scale to 1x (base)."""
     set_scale(1.0)
 
-
-def load_emoji_font(size: int) -> ImageFont.ImageFont:
-    """Load an emoji-capable font if available (no warnings), else default.
-
-    Tries Noto Color Emoji which covers most emoji glyphs.
-    """
-    candidates = [
-        # Linux
-        "/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf",
-        "/usr/share/fonts/truetype/emoji/NotoColorEmoji.ttf",
-        # macOS (Apple Color Emoji is not a TTF route Pillow can load typically)
-        "/System/Library/Fonts/Apple Color Emoji.ttc",
-        # Windows
-        "C:/Windows/Fonts/seguiemj.ttf",
-    ]
-    for p in candidates:
-        if os.path.exists(p):
-            try:
-                return ImageFont.truetype(
-                    p, size, layout_engine=_PREFERRED_LAYOUT_ENGINE
-                )
-            except Exception:
-                continue
-    return ImageFont.load_default()
 
 
 def load_cjk_font(size: int) -> ImageFont.ImageFont:

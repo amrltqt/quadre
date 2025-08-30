@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from quadre.flex.runner import build_layout_from_declarative
-from quadre.flex.engine import FlexContainer, TextWidget
-from quadre.flex.widgets import Spacer
+from quadre.flex.engine import FlexContainer
+from quadre.flex.widgets import Spacer, TextWidget
 
 
 def _unwrap_first_container(root: FlexContainer) -> FlexContainer:

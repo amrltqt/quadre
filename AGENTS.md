@@ -32,7 +32,7 @@ This repository generates dashboard images from JSON using Pillow (PIL). It expo
 ## Entrypoints & Commands
 
 - Render via Python module:
-  - `uv run -m quadre.main data.json out/dashboard.png`
+  - `uv run -m quadre.cli render data.json out/dashboard.png`
 - CLI wrappers (installed):
   - `quadre render examples/declarative_featured.json out.png`
   - `quadre validate examples/declarative_featured.json`
@@ -44,7 +44,7 @@ This repository generates dashboard images from JSON using Pillow (PIL). It expo
 ## Run Locally
 
 - Python 3.12+ recommended (see `pyproject.toml`)
-- With uv (preferred): `uv run -m quadre.main data.json out.png`
+- With uv (preferred): `uv run -m quadre.cli render data.json out.png`
 - Or install package then run `quadre`
 
 ## Tests
@@ -59,7 +59,7 @@ This repository generates dashboard images from JSON using Pillow (PIL). It expo
 - Flex Engine (`engine.py`)
   - `Widget` (measure/render contract)
   - `FlexContainer` (row/column, gap, padding, align/justify, grow/shrink)
-  - `TextWidget` (emoji/CJK segmentation, measures via `textbbox`)
+  - `TextWidget` (CJK segmentation, measures via `textbbox`)
   - `resolve_path` (simple JSONPath‑like resolver: `$.a.b[0]`)
 - Renderer modules
   - `runner.render_dashboard_with_flex`: theme/scale, measure preferred height, render/crop

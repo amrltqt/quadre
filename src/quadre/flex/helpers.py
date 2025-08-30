@@ -4,7 +4,8 @@ from typing import Dict, Any
 
 from ..components import COLORS, DIMENSIONS, FONTS
 from .defaults import defaults_for, parse_color
-from .engine import FlexContainer, TextWidget
+from .engine import FlexContainer
+from .widgets import TextWidget
 from .widgets import TableWidget, Spacer
 
 
@@ -22,6 +23,24 @@ def _apply_container_defaults(cont: FlexContainer, overrides: Dict[str, Any] | N
     cont.bg_radius = int(ov.get("bg_radius", d.get("bg_radius", cont.bg_radius)))
     cont.bg_fill = parse_color(ov.get("bg_fill", d.get("bg_fill")))
     cont.bg_outline = parse_color(ov.get("bg_outline", d.get("bg_outline")))
+    if "bg_outline_width" in ov:
+        try:
+            cont.bg_outline_width = int(ov["bg_outline_width"])  # type: ignore[attr-defined]
+        except Exception:
+            pass
+    # Soft shadow options (opt-in)
+    try:
+        cont.shadow = bool(ov.get("shadow", getattr(cont, "shadow", False)))
+        if "shadow_offset_x" in ov:
+            cont.shadow_offset_x = int(ov["shadow_offset_x"])
+        if "shadow_offset_y" in ov:
+            cont.shadow_offset_y = int(ov["shadow_offset_y"])
+        if "shadow_radius" in ov:
+            cont.shadow_radius = int(ov["shadow_radius"])
+        if "shadow_alpha" in ov:
+            cont.shadow_alpha = int(ov["shadow_alpha"])
+    except Exception:
+        pass
     return cont
 
 
@@ -30,17 +49,12 @@ def _text_from_props(text: str, props: Dict[str, Any] | None = None) -> TextWidg
     p = dict(d)
     if props:
         p.update(_norm_props(props))
-    font_map = {
-        "title": FONTS.H1,
-        "heading": FONTS.H2,
-        "body": FONTS.BODY,
-        "caption": FONTS.SMALL,
-        "table": FONTS.TABLE,
-    }
-    font = font_map.get(p.get("font", "body"), FONTS.BODY)
+    # Defer font resolution to render time using a dynamic key; this keeps
+    # TextWidget font sizes in sync with supersampling scale changes.
+    font_key = str(p.get("font", "body")).lower()
     fill = parse_color(p.get("fill")) or parse_color(COLORS.FOREGROUND) or (20, 20, 20)
     align = p.get("align", "left")
-    return TextWidget(text, fill=fill, font=font, align=align)
+    return TextWidget(text, fill=fill, font=None, font_key=font_key, align=align)
 
 
 def _table_from_props(tbl_data: Any, props: Dict[str, Any] | None = None) -> TableWidget:

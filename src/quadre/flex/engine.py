@@ -8,8 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import List, Optional, Tuple
 
-from PIL import Image, ImageDraw, ImageFont
-from quadre.components.config import load_emoji_font, load_cjk_font
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 
 class Widget:
@@ -46,127 +45,7 @@ class FixedBox(Widget):
         )
 
 
-@dataclass
-class TextWidget(Widget):
-    text: str
-    fill: Tuple[int, int, int] = (20, 20, 20)
-    font: Optional[ImageFont.ImageFont] = None
-    align: str = "left"  # left|center|right
-
-    def _font(self) -> ImageFont.ImageFont:
-        if self.font:
-            return self.font
-        # fallback default font
-        return ImageFont.load_default()
-
-    def _emoji_font(self) -> ImageFont.ImageFont:
-        base = self._font()
-        try:
-            size = getattr(base, "size", 14) or 14
-        except Exception:
-            size = 14
-        return load_emoji_font(size)
-
-    def _cjk_font(self) -> ImageFont.ImageFont:
-        base = self._font()
-        try:
-            size = getattr(base, "size", 14) or 14
-        except Exception:
-            size = 14
-        return load_cjk_font(size)
-
-    @staticmethod
-    def _is_emoji(ch: str) -> bool:
-        o = ord(ch)
-        return (0x1F300 <= o <= 0x1FAFF) or (0x2700 <= o <= 0x27BF) or (o == 0xFE0F)
-
-    @staticmethod
-    def _is_cjk(ch: str) -> bool:
-        o = ord(ch)
-        return (
-            0x4E00 <= o <= 0x9FFF  # CJK Unified Ideographs
-            or 0x3400 <= o <= 0x4DBF  # CJK Unified Ideographs Extension A
-            or 0xF900 <= o <= 0xFAFF  # CJK Compatibility Ideographs
-        )
-
-    def _segment_runs(self) -> List[Tuple[str, ImageFont.ImageFont]]:
-        base = self._font()
-        emoji = self._emoji_font()
-        cjk = self._cjk_font()
-        segments: List[Tuple[str, ImageFont.ImageFont]] = []
-        buf: List[str] = []
-        cur_font = base
-        for ch in self.text:
-            want = cjk if self._is_cjk(ch) else (emoji if self._is_emoji(ch) else base)
-            if want is cur_font:
-                buf.append(ch)
-            else:
-                if buf:
-                    segments.append(("".join(buf), cur_font))
-                    buf = []
-                cur_font = want
-                buf.append(ch)
-        if buf:
-            segments.append(("".join(buf), cur_font))
-        return segments
-
-    def measure(
-        self, draw: ImageDraw.ImageDraw, avail_w: int, avail_h: int
-    ) -> Tuple[int, int]:
-        runs = self._segment_runs()
-        if runs:
-            total_w = sum(int(f.getlength(s)) for s, f in runs)
-            # height: approximate max of per-font line heights using textbbox on 'Ay'
-            heights = []
-            for _, f in runs:
-                bb = draw.textbbox((0, 0), "Ay", font=f)
-                heights.append(bb[3] - bb[1])
-            h = max(heights) if heights else 0
-            return (min(total_w, avail_w), min(h, avail_h))
-        else:
-            font = self._font()
-            bbox = draw.textbbox((0, 0), self.text, font=font)
-            w = bbox[2] - bbox[0]
-            h = bbox[3] - bbox[1]
-            return (min(w, avail_w), min(h, avail_h))
-
-    def render(self, draw: ImageDraw.ImageDraw, x: int, y: int, w: int, h: int) -> None:
-        runs = self._segment_runs()
-        if not runs:
-            font = self._font()
-            bbox = draw.textbbox((0, 0), self.text, font=font)
-            tw = bbox[2] - bbox[0]
-            th = bbox[3] - bbox[1]
-            if self.align == "center":
-                tx = x + (w - tw) // 2
-            elif self.align == "right":
-                tx = x + w - tw
-            else:
-                tx = x
-            ty = y + (h - th) // 2
-            draw.text((tx, ty), self.text, fill=self.fill, font=font)
-            return
-
-        total_w = sum(int(f.getlength(s)) for s, f in runs)
-        # Determine vertical placement using max height
-        heights = []
-        for _, f in runs:
-            bb = draw.textbbox((0, 0), "Ay", font=f)
-            heights.append(bb[3] - bb[1])
-        th = max(heights) if heights else 0
-
-        if self.align == "center":
-            tx = x + (w - total_w) // 2
-        elif self.align == "right":
-            tx = x + w - total_w
-        else:
-            tx = x
-        ty = y + (h - th) // 2
-
-        cx = tx
-        for seg, fnt in runs:
-            draw.text((cx, ty), seg, fill=self.fill, font=fnt)
-            cx += int(fnt.getlength(seg))
+    # TextWidget moved to flex.widgets
 
 
 @dataclass
@@ -192,6 +71,13 @@ class FlexContainer(Widget):
     bg_outline: Optional[Tuple[int, int, int]] = None
     bg_radius: int = 12
     clip_children: bool = True
+    bg_outline_width: int = 1
+    # Optional soft shadow behind background
+    shadow: bool = False
+    shadow_offset_x: int = 0
+    shadow_offset_y: int = 2
+    shadow_radius: int = 8
+    shadow_alpha: int = 60
 
     def add(
         self,
@@ -348,21 +234,36 @@ class FlexContainer(Widget):
         return rects
 
     def render(self, draw: ImageDraw.ImageDraw, x: int, y: int, w: int, h: int) -> None:
+        base_img = getattr(draw, "_quadre_image", None)
+        # optional shadow behind background
+        if self.shadow and base_img is not None and w > 0 and h > 0:
+            r = min(self.bg_radius, min(w, h) // 2)
+            sh = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+            sdraw = ImageDraw.Draw(sh)
+            sdraw.rounded_rectangle((0, 0, w, h), r, fill=(0, 0, 0, max(0, min(255, self.shadow_alpha))))
+            if self.shadow_radius and self.shadow_radius > 0:
+                sh = sh.filter(ImageFilter.GaussianBlur(self.shadow_radius))
+            base_img.paste(sh, (x + self.shadow_offset_x, y + self.shadow_offset_y), sh)
         # optional background
         if self.bg_fill or self.bg_outline:
             r = min(self.bg_radius, min(w, h) // 2)
             draw.rounded_rectangle(
-                (x, y, x + w, y + h), r, fill=self.bg_fill, outline=self.bg_outline
+                (x, y, x + w, y + h), r, fill=self.bg_fill, outline=self.bg_outline, width=max(1, int(self.bg_outline_width))
             )
         rects = self._layout(draw, x, y, w, h)
-        base_img = getattr(draw, "_ezp_image", None)
+        # The runner sets the backing PIL image on the draw object under
+        # "_quadre_image". Use that to enable per-child clipping via
+        # offscreen layers. Previously this looked up "_ezp_image",
+        # which disabled clipping and could cause overlap between siblings.
+        base_img = getattr(draw, "_quadre_image", None)
         for item, rect in zip(self.children, rects):
             ix, iy, iw, ih = rect
             if self.clip_children and base_img is not None and iw > 0 and ih > 0:
                 # Render child into an offscreen layer to guarantee no overdraw outside bounds
                 layer = Image.new("RGBA", (iw, ih), (0, 0, 0, 0))
                 ldraw = ImageDraw.Draw(layer)
-                setattr(ldraw, "_ezp_image", layer)
+                # Propagate the backing image for child widgets that expect it
+                setattr(ldraw, "_quadre_image", layer)
                 try:
                     item.widget.render(ldraw, 0, 0, iw, ih)
                 finally:

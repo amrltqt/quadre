@@ -12,13 +12,13 @@ For complete docs, see docs/index.md.
 Render an example dashboard to PNG using uv (no install required):
 
 ```bash
-uv run -m quadre.main examples/declarative_featured.json out/featured.png
+uv run -m quadre.cli examples/declarative_featured.json out/featured.png
 ```
 
 Validate a JSON document (schema + friendly warnings):
 
 ```bash
-uv run -m quadre.validator examples/declarative_featured.json
+quadre validate examples/declarative_featured.json
 ```
 
 Using the installed CLI instead of uv:
@@ -28,11 +28,72 @@ quadre render examples/declarative_featured.json out.png
 quadre validate examples/declarative_featured.json
 ```
 
-With Docker (reproducible environment):
+## Python API
 
-```bash
-make run examples/declarative_featured.json
+Install and render from Python without touching disk or with custom outputs:
+
+```python
+from quadre import render, build_image, to_bytes
+
+# 1) Simple: write a file (default plugin)
+render(doc, path="out.png")
+
+# 2) Multiple outputs: file + anything else
+render(doc, outputs=[
+  {"plugin": "file", "path": "out.webp", "format": "WEBP"},
+  # Example: if you installed a third-party plugin registered as "s3"
+  {"plugin": "s3", "bucket": "my-bucket", "key": "dashboards/out.png"},
+])
+
+# 3) In-memory usage
+img = build_image(doc)          # PIL.Image
+data = to_bytes(doc, "PNG")     # bytes
 ```
+
+### Typed Builder (optional)
+
+Prefer composer code in Python? Use the typed builder to generate the same declarative JSON and keep a single rendering path:
+
+```python
+from quadre.flex import Text, KPI, Row, Title, dref, make_doc
+
+doc = make_doc(
+    Title("Awesome dashboard"),
+    Row().gap(12).add(
+        Text("Headline").font("heading").no_grow(),
+        KPI(title=dref("$.perf.title"), value=dref("$.perf.value")),
+        KPI(title="Orders", value="12,345"),
+    ),
+    data={
+        "perf": {"title": "Revenue", "value": "4,567k€"}
+    },
+    canvas={"height": "auto"},
+)
+
+# Render (uses the same validator + adapter + flex engine)
+from quadre import render
+render(doc.to_dict(), path="out.png")
+```
+
+Notes:
+- `.grow(r)` on children inside a Row maps to `properties.width_ratio` (use `.no_grow()` to keep intrinsic width).
+- For Column children, use `.fill_remaining()` to stretch or `.height(px)` to suggest a fixed basis.
+- You can mix builder-generated nodes with hand-written JSON in the same document if needed.
+
+To add your own output destination, expose a function and register it:
+
+```python
+from quadre import register_output_plugin
+
+def my_sink(image, ctx, cfg):
+    # image: PIL.Image.Image
+    # ctx: OutputContext(path, format, doc, size)
+    # cfg: dict from your outputs spec
+    ...
+
+register_output_plugin("my_sink", my_sink)
+```
+
 
 ## Features
 
@@ -47,22 +108,19 @@ make run examples/declarative_featured.json
 - Python: 3.12+
 - Recommended: [uv](https://github.com/astral-sh/uv) for fast, isolated runs
 
-Docker setup is also available (handy for production):
+From PyPI (CLI + library):
 
 ```bash
-# Build the Docker image
-make build
-
-# Run with Docker
-make run
+pip install quadre
 ```
+
 
 ## Usage (uv)
 
 ### Basic Usage
 
 ```bash
-uv run -m quadre.main -i data.json
+uv run -m quadre.cli render -h
 ```
 
 This generates `dashboard.png` from your JSON data.
@@ -70,7 +128,7 @@ This generates `dashboard.png` from your JSON data.
 ### Specify Output File
 
 ```bash
-uv run -m quadre.main -i data.json -o my_dashboard.png
+uv run -m quadre.cli render examples/declarative_featured.json out.png
 ```
 
 ### Command Line Options
@@ -83,59 +141,14 @@ uv run -m quadre.main -i data.json -o my_dashboard.png
 
 ```bash
 # Generate dashboard with default output name
-uv run -m quadre.main -i examples/flex_e2e.json
+uv run -m quadre.cli render -h
 
 # Generate dashboard with custom output name
-uv run -m quadre.main -i my_data.json -o report_2024.png
+quadre render -h
 
 # Using long form arguments
-uv run -m quadre.main --input quarterly_data.json --output q4_report.png
+quadre render examples/declarative_featured.json out.png
 
-# Docker examples
-make run
-make run DATA=my_data.json OUT_FILE=custom_report.png
-```
-
-## Docker Integration
-
-The project includes full Docker support with a Makefile for easy deployment:
-
-### Docker Commands
-
-```bash
-# Build the Docker image
-make build
-
-# Run with default data.json
-make run
-
-# Run with custom data and output
-make run DATA=my_data.json OUT_FILE=report.png
-
-# Interactive shell for debugging
-make shell
-
-# Clean generated files
-make clean
-
-# Rebuild without cache
-make rebuild
-```
-
-### Makefile Variables
-
-You can override these variables:
-
-- `DATA`: Input JSON file (default: `$(PWD)/data.json`)
-- `OUT_DIR`: Output directory (default: `$(PWD)/out`)
-- `OUT_FILE`: Output filename (default: `dashboard.png`)
-- `IMAGE`: Docker image name (default: `dash-render-uv`)
-- `TAG`: Docker image tag (default: `latest`)
-- `RUN_ARGS`: Extra Docker run arguments
-```
-
-<old_text line=97>
-}
 ```
 
 See `examples/flex_e2e.json` for a complete working example.
@@ -152,7 +165,7 @@ uv run examples/flex_demo.py
 uv run examples/flex_e2e.py
 
 # Render your JSON with the default (Flex) path
-uv run -m quadre.main your_data.json output.png
+uv run -m quadre.cli render your_data.json output.png
 ```
 
 Images are written to `out/`.

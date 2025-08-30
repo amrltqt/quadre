@@ -221,6 +221,13 @@ def _post_validate_content_vs_props(
         "bg_radius",
         "bg_fill",
         "bg_outline",
+        "bg_outline_width",
+        # container visuals
+        "shadow",
+        "shadow_offset_x",
+        "shadow_offset_y",
+        "shadow_radius",
+        "shadow_alpha",
         # text styling
         "font",
         "fill",

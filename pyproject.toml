@@ -1,8 +1,3 @@
-[build-system]
-requires = [ "hatchling" ]
-build-backend = "hatchling.build"
-
-
 [project]
 name = "quadre"
 version = "0.1.0"
@@ -10,15 +5,28 @@ description = "A Python CLI tool that generates beautiful dashboard images from 
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [ "pillow>=11.3.0", "pydantic>=2.7,<3" ]
+classifiers = [
+  "Typing :: Typed",
+]
 
 
 [project.scripts]
-quadre = "quadre.__main__:main"
-quadre-validate = "quadre.validator:main"
+quadre = "quadre.cli:main"
+quadre-validate = "quadre.cli:main_validate"
+
+
+[build-system]
+requires = [ "hatchling" ]
+build-backend = "hatchling.build"
 
 
 [tool.hatch.build.targets.wheel]
 packages = [ "src/quadre" ]
+include = [ "src/quadre/theme/*.json", "src/quadre/py.typed" ]
+
+
+[tool.hatch.build.targets.sdist]
+include = [ "src/quadre", "src/quadre/theme/*.json", "src/quadre/py.typed", "README.md" ]
 
 
 [dependency-groups]

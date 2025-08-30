@@ -3,10 +3,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List, Optional, Tuple, Union
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
 from .engine import Widget
 from ..components import DIMENSIONS, KPICard, COLORS, FONTS, ImageBlock, ProgressBar, StatusBadge
+from ..components.config import load_cjk_font
 from .defaults import parse_color
 from ..components.tables import (
     create_auto_table,
@@ -249,3 +250,128 @@ class StatusBadgeWidget(Widget):
         _, bh = sb.measure()
         by = y + (h - bh) // 2
         sb.render(draw, x, by)
+from dataclasses import dataclass
+
+
+@dataclass
+class TextWidget(Widget):
+    text: str
+    fill: Tuple[int, int, int] = (20, 20, 20)
+    font: Optional[ImageFont.ImageFont] = None
+    font_key: Optional[str] = None  # dynamic key resolved against FONTS at render time
+    align: str = "left"  # left|center|right
+
+    def _font(self) -> ImageFont.ImageFont:
+        # Prefer dynamic lookup if a key is provided (keeps in sync with scaling)
+        if self.font_key:
+            key = str(self.font_key).lower()
+            if key == "title":
+                return FONTS.H1
+            if key == "heading":
+                return FONTS.H2
+            if key == "number":
+                return FONTS.NUMBER
+            if key == "table":
+                return FONTS.TABLE
+            if key == "small" or key == "caption":
+                return FONTS.SMALL
+            return FONTS.BODY
+        if self.font:
+            return self.font
+        return ImageFont.load_default()
+
+    def _cjk_font(self) -> ImageFont.ImageFont:
+        base = self._font()
+        try:
+            size = getattr(base, "size", 14) or 14
+        except Exception:
+            size = 14
+        return load_cjk_font(size)
+
+    @staticmethod
+    def _is_cjk(ch: str) -> bool:
+        o = ord(ch)
+        return (
+            0x4E00 <= o <= 0x9FFF
+            or 0x3400 <= o <= 0x4DBF
+            or 0xF900 <= o <= 0xFAFF
+        )
+
+    def _segment_runs(self) -> List[Tuple[str, ImageFont.ImageFont]]:
+        base = self._font()
+        cjk = self._cjk_font()
+        segments: List[Tuple[str, ImageFont.ImageFont]] = []
+        buf: List[str] = []
+        cur_font = base
+        for ch in self.text:
+            want = cjk if self._is_cjk(ch) else base
+            if want is cur_font:
+                buf.append(ch)
+            else:
+                if buf:
+                    segments.append(("".join(buf), cur_font))
+                    buf = []
+                cur_font = want
+                buf.append(ch)
+        if buf:
+            segments.append(("".join(buf), cur_font))
+        return segments
+
+    def _line_height(self, draw: ImageDraw.ImageDraw, font: ImageFont.ImageFont) -> int:
+        try:
+            asc, desc = font.getmetrics()
+            return int(asc + desc)
+        except Exception:
+            bb = draw.textbbox((0, 0), "Ag", font=font)
+            return int(bb[3] - bb[1])
+
+    def measure(self, draw: ImageDraw.ImageDraw, avail_w: int, avail_h: int) -> Tuple[int, int]:
+        runs = self._segment_runs()
+        if runs:
+            total_w = sum(int(f.getlength(s)) for s, f in runs)
+            # Use font metrics (ascent+descent) to guarantee room for descenders
+            heights = [self._line_height(draw, f) for _, f in runs]
+            h = max(heights) if heights else 0
+            # Add a 1px safety pad to avoid AA clipping in tight boxes
+            h_safe = h + 1 if h > 0 else 0
+            return (min(total_w, avail_w), min(h_safe, avail_h))
+        else:
+            font = self._font()
+            # Height from metrics with a small safety pad
+            h = self._line_height(draw, font)
+            w = int(font.getlength(self.text))
+            h_safe = h + 1 if h > 0 else 0
+            return (min(w, avail_w), min(h_safe, avail_h))
+
+    def render(self, draw: ImageDraw.ImageDraw, x: int, y: int, w: int, h: int) -> None:
+        runs = self._segment_runs()
+        if not runs:
+            font = self._font()
+            bbox = draw.textbbox((0, 0), self.text, font=font)
+            tw = bbox[2] - bbox[0]
+            th = bbox[3] - bbox[1]
+            if self.align == "center":
+                tx = x + (w - tw) // 2
+            elif self.align == "right":
+                tx = x + w - tw
+            else:
+                tx = x
+            ty = y + (h - th) // 2
+            draw.text((tx, ty), self.text, fill=self.fill, font=font)
+            return
+
+        total_w = sum(int(f.getlength(s)) for s, f in runs)
+        th = max((self._line_height(draw, f) for _, f in runs), default=0)
+
+        if self.align == "center":
+            tx = x + (w - total_w) // 2
+        elif self.align == "right":
+            tx = x + w - total_w
+        else:
+            tx = x
+        ty = y + (h - th) // 2
+
+        cx = tx
+        for seg, fnt in runs:
+            draw.text((cx, ty), seg, fill=self.fill, font=fnt)
+            cx += int(fnt.getlength(seg))
