@@ -5,7 +5,16 @@ description = "A Python CLI tool that generates beautiful dashboard images from 
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [ "pillow>=11.3.0", "pydantic>=2.7,<3" ]
-classifiers = [ "Typing :: Typed" ]
+classifiers = [ "Typing :: Typed", "License :: OSI Approved :: MIT License" ]
+
+
+[[project.authors]]
+name = "Quentin Amirault"
+email = "amirault.quentin@gmail.com"
+
+
+[project.license]
+file = "LICENSE"
 
 
 [project.scripts]
