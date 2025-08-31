@@ -20,13 +20,6 @@ define _print
 	@printf "▶ %s\n" "$(1)"
 endef
 
-# ---- Publishing config (PyPI/TestPyPI) ----
-# Usage:
-#   make build-dist
-#   make publish-test TWINE_PASSWORD=...    # uploads to TestPyPI
-#   make publish      TWINE_PASSWORD=...    # uploads to PyPI
-TWINE_USERNAME ?= __token__
-TWINE_PASSWORD ?=
 
 # ---- Positional JSON convenience ----
 # Allow: `make run examples/file.json` or `make validate examples/file.json`
@@ -70,16 +63,19 @@ build: clean-dist ## Build wheel + sdist with uv (ephemeral build tool)
 	uv run --with build python -m build
 	$(call _print,OK -> dist/)
 
-.PHONY: publish-test
-publish-test: build-dist ## Upload to TestPyPI (set TWINE_PASSWORD=<token>)
-	@[ -n "$(TWINE_PASSWORD)" ] || (echo "Error: set TWINE_PASSWORD to your TestPyPI token"; exit 1)
-	$(call _print,Upload to TestPyPI)
-	TWINE_USERNAME=$(TWINE_USERNAME) TWINE_PASSWORD=$(TWINE_PASSWORD) \
-	uv run --with twine python -m twine upload -r testpypi dist/*
-
 .PHONY: publish
 publish: build-dist ## Upload to PyPI (set TWINE_PASSWORD=<token>)
-	@[ -n "$(TWINE_PASSWORD)" ] || (echo "Error: set TWINE_PASSWORD to your PyPI token"; exit 1)
 	$(call _print,Upload to PyPI)
-	TWINE_USERNAME=$(TWINE_USERNAME) TWINE_PASSWORD=$(TWINE_PASSWORD) \
 	uv run --with twine python -m twine upload dist/*
+
+
+# ---- Local run/validate (no Docker) ----
+.PHONY: run
+run: ## Render $(DATA) to $(OUT_DIR)/$(OUT_FILE) using uv
+	@mkdir -p "$(OUT_DIR)"
+	uv run -m quadre.cli render "$(DATA)" "$(OUT_DIR)/$(OUT_FILE)"
+	$(call _print,Wrote $(OUT_DIR)/$(OUT_FILE))
+
+.PHONY: validate
+validate: ## Validate $(DATA) JSON via uv (schema + warnings)
+	uv run -m quadre.cli validate "$(DATA)"
