@@ -130,6 +130,99 @@ Then in your document:
 ]
 ```
 
+## Writing a plugin (example: Email)
+
+A minimal email plugin that encodes the image and sends it as an attachment via SMTP.
+
+```
+# quadre_plugin_email/__init__.py
+import io
+import smtplib
+from email.message import EmailMessage
+from quadre.plugins import register_plugin
+
+def email_plugin(image, ctx, cfg):
+    """
+    cfg expects:
+      {
+        "to": "alice@example.com, bob@example.com",
+        "from": "no-reply@example.com",
+        "subject": "Dashboard",
+        "host": "smtp.example.com",
+        "port": 587,
+        "user": "smtp-user",          # optional
+        "password": "smtp-pass",      # optional
+        "use_tls": true,               # starttls (default true)
+        "format": "PNG"               # optional; defaults to ctx.format
+      }
+    """
+    # Encode image
+    buf = io.BytesIO()
+    fmt = (cfg.get("format") or ctx.format)
+    image.save(buf, format=fmt)
+    payload = buf.getvalue()
+
+    # Build message
+    msg = EmailMessage()
+    msg["Subject"] = cfg.get("subject", "Dashboard")
+    msg["From"] = cfg.get("from", "no-reply@example.com")
+    msg["To"] = cfg.get("to")
+    maintype, subtype = "image", fmt.lower()
+    filename = (ctx.path or f"dashboard.{subtype}").split("/")[-1]
+    msg.set_content("See attached dashboard")
+    msg.add_attachment(payload, maintype=maintype, subtype=subtype, filename=filename)
+
+    # Send via SMTP
+    host = cfg.get("host")
+    port = int(cfg.get("port", 587))
+    use_tls = bool(cfg.get("use_tls", True))
+    if not host:
+        raise ValueError("email plugin requires 'host'")
+    with smtplib.SMTP(host, port) as s:
+        if use_tls:
+            s.starttls()
+        user = cfg.get("user")
+        pwd = cfg.get("password")
+        if user and pwd:
+            s.login(user, pwd)
+        s.send_message(msg)
+    return f"email://{msg['To']}"
+
+register_plugin("email", email_plugin)
+```
+
+Or expose it via entry points so Quadre auto‑discovers it:
+
+```
+# pyproject.toml (of your plugin package)
+[project.entry-points."quadre.output_plugins"]
+email = "quadre_plugin_email:email_plugin"
+```
+
+Use it from a document:
+
+```
+"outputs": [
+  { "plugin": "file", "path": "out.png" },
+  {
+    "plugin": "email",
+    "to": "team@example.com",
+    "from": "no-reply@example.com",
+    "subject": "Daily Dashboard",
+    "host": "smtp.example.com",
+    "port": 587,
+    "user": "smtp-user",
+    "password": "smtp-pass",
+    "use_tls": true,
+    "format": "PNG"
+  }
+]
+```
+
+Notes:
+- Keep credentials out of JSON if possible (e.g., read from environment inside the plugin).
+- For large attachments, consider WEBP or JPEG to reduce size; set `format` accordingly.
+
 ## Tips
 
 - For large images and uploads, consider `tempfile.SpooledTemporaryFile` in your plugin to avoid holding the entire buffer in memory.
