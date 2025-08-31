@@ -24,6 +24,8 @@ from .utils import image_to_bytes
 
 # Ensure builtins are registered on import
 from . import builtin  # noqa: F401
+# Register the minimal stdlib-based email plugin (no extra deps)
+from . import email  # noqa: F401
 
 # Optional: load external plugins via entry points
 try:

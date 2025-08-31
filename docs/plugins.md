@@ -57,6 +57,11 @@ Notes:
   - Options: `format` (default from context).
   - Code: `src/quadre/plugins/builtin.py:35`.
 
+- `email`: sends the image as an email attachment via SMTP (stdlib-only).
+  - Options (cfg): `to` (required), `from`, `subject`, `host` (required unless via env), `port` (default 587), `user`, `password`, `use_tls` (default true), `use_ssl` (default false), `timeout`, `format`, `body`.
+  - Env vars (secrets/connection only): `QUADRE_EMAIL_HOST`, `QUADRE_EMAIL_PORT`, `QUADRE_EMAIL_USER`, `QUADRE_EMAIL_PASSWORD`, `QUADRE_EMAIL_TLS`, `QUADRE_EMAIL_SSL`, `QUADRE_EMAIL_TIMEOUT`, `QUADRE_EMAIL_FORMAT`.
+  - Code: `src/quadre/plugins/email.py`.
+
 ## Programmatic usage (Python)
 
 Prefer the high-level API for most use cases:
@@ -222,6 +227,45 @@ Use it from a document:
 Notes:
 - Keep credentials out of JSON if possible (e.g., read from environment inside the plugin).
 - For large attachments, consider WEBP or JPEG to reduce size; set `format` accordingly.
+
+### Email plugin configuration
+
+Best practice: pass routing/metadata via plugin cfg, and keep secrets in env.
+
+- Required cfg: `to`
+- Recommended cfg: `from`, `subject`, `body`
+- Env (optional):
+  - `QUADRE_EMAIL_HOST`: SMTP hostname (required if not in cfg)
+  - `QUADRE_EMAIL_PORT`: SMTP port (default 587)
+  - `QUADRE_EMAIL_USER`: SMTP username (optional)
+  - `QUADRE_EMAIL_PASSWORD`: SMTP password (optional)
+  - `QUADRE_EMAIL_TLS`: `1/true/yes` to enable STARTTLS (default true)
+  - `QUADRE_EMAIL_SSL`: `1/true/yes` to use SMTP over SSL (port 465 typically; default false)
+  - `QUADRE_EMAIL_FORMAT`: image format override (default from context)
+  - `QUADRE_EMAIL_TIMEOUT`: socket timeout in seconds
+
+Example:
+
+```
+export QUADRE_EMAIL_HOST="smtp.example.com"
+export QUADRE_EMAIL_USER="smtp-user"
+export QUADRE_EMAIL_PASSWORD="smtp-pass"
+
+# In document (recommended):
+# {
+#   ...,
+#   "outputs": [ {
+#     "plugin": "email",
+#     "to": "team@example.com",
+#     "from": "no-reply@example.com",
+#     "subject": "Daily Dashboard"
+#   } ]
+# }
+quadre render examples/declarative_featured.json out.png
+
+# Programmatic use
+python -c 'import json,quadre;doc=json.load(open("examples/declarative_featured.json"));quadre.render(doc, outputs={"plugin":"email","to":"team@example.com","from":"no-reply@example.com","subject":"Daily Dashboard"})'
+```
 
 ## Tips
 

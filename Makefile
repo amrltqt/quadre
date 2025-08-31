@@ -67,3 +67,15 @@ build: clean-dist ## Build wheel + sdist with uv (ephemeral build tool)
 publish: build-dist ## Upload to PyPI (set TWINE_PASSWORD=<token>)
 	$(call _print,Upload to PyPI)
 	uv run --with twine python -m twine upload dist/*
+
+
+# ---- Local run/validate (no Docker) ----
+.PHONY: run
+run: ## Render $(DATA) to $(OUT_DIR)/$(OUT_FILE) using uv
+	@mkdir -p "$(OUT_DIR)"
+	uv run -m quadre.cli render "$(DATA)" "$(OUT_DIR)/$(OUT_FILE)"
+	$(call _print,Wrote $(OUT_DIR)/$(OUT_FILE))
+
+.PHONY: validate
+validate: ## Validate $(DATA) JSON via uv (schema + warnings)
+	uv run -m quadre.cli validate "$(DATA)"
