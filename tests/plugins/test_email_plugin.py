@@ -191,3 +191,74 @@ def test_email_plugin_recipient_parsing_semicolons_and_commas(monkeypatch):
     assert ret == "email://a@x,b@x,c@x"
     assert dummy.sent["To"] == "a@x, b@x, c@x"
 
+
+def test_email_plugin_inline_cid_inserts_html_and_related_image(monkeypatch):
+    import smtplib
+
+    dummy = _DummySMTP("", 0)
+
+    def _smtp(host, port, timeout=None):
+        nonlocal dummy
+        dummy = _DummySMTP(host, port, timeout)
+        return dummy
+
+    monkeypatch.setenv("QUADRE_EMAIL_HOST", "smtp.example.com")
+    monkeypatch.setattr(smtplib, "SMTP", _smtp)
+
+    img = _make_img()
+    ctx = _make_ctx(path="report.png", fmt="PNG")
+    cfg = {"to": "inline@example.com", "inline": True, "subject": "Inline"}
+
+    email_plugin(img, ctx, cfg)
+    msg = dummy.sent
+    assert msg is not None
+    # Has HTML alternative with cid reference
+    html_part = msg.get_body("html")
+    assert html_part is not None
+    html_payload = html_part.get_content()
+    assert "cid:" in html_payload
+    # Ensure a related image part exists with Content-ID
+    related_found = False
+    for part in msg.walk():
+        if part.get_content_maintype() == "image" and part.get("Content-ID"):
+            related_found = True
+            assert part.get_content_subtype() == "png"
+            break
+    assert related_found
+
+
+def test_email_plugin_inline_custom_html_with_placeholder(monkeypatch):
+    import smtplib, re
+
+    dummy = _DummySMTP("", 0)
+
+    def _smtp(host, port, timeout=None):
+        nonlocal dummy
+        dummy = _DummySMTP(host, port, timeout)
+        return dummy
+
+    monkeypatch.setenv("QUADRE_EMAIL_HOST", "smtp.example.com")
+    monkeypatch.setattr(smtplib, "SMTP", _smtp)
+
+    img = _make_img()
+    ctx = _make_ctx(path="dash.webp", fmt="WEBP")
+    cfg = {
+        "to": "inline2@example.com",
+        "inline": True,
+        "html_body": "<p>Inline here:</p><img src=\"cid:{cid}\">",
+    }
+
+    email_plugin(img, ctx, cfg)
+    msg = dummy.sent
+    html = msg.get_body("html").get_content()
+    m = re.search(r'cid:([^"]+)', html)
+    assert m, "CID not found in HTML"
+    cid_val = m.group(1)
+    # Ensure there's an image with matching Content-ID (with angle brackets)
+    match_found = False
+    for part in msg.walk():
+        cid_header = part.get("Content-ID")
+        if cid_header and cid_val in cid_header:
+            match_found = True
+            break
+    assert match_found

@@ -39,6 +39,8 @@ import os
 import smtplib
 import ssl
 from email.message import EmailMessage
+from email.utils import make_msgid
+import html as _html
 from typing import Any, Mapping, Optional, Sequence
 
 from PIL import Image
@@ -116,12 +118,38 @@ def email_plugin(image: Image.Image, ctx: OutputContext, cfg: Mapping[str, Any])
     msg["To"] = ", ".join(recipients)
     filename = (ctx.path or f"dashboard.{fmt.lower()}").split("/")[-1]
     msg.set_content(str(body))
-    msg.add_attachment(
-        payload,
-        maintype="image",
-        subtype=fmt.lower(),
-        filename=filename,
-    )
+
+    # Inline (CID) support
+    inline_flag = _bool(cfg.get("inline"), False)
+    html_body = cfg.get("html_body")
+    if inline_flag:
+        cid = make_msgid()
+        cid_val = cid[1:-1]
+        if isinstance(html_body, str) and html_body.strip():
+            html = html_body.replace("{cid}", cid_val)
+        else:
+            html = (
+                f"<html><body><p>{_html.escape(str(body))}</p>"
+                f"<img src=\"cid:{cid_val}\" alt=\"{_html.escape(filename)}\" style=\"max-width:100%;height:auto\"/>"
+                f"</body></html>"
+            )
+        msg.add_alternative(html, subtype="html")
+        html_part = msg.get_body("html")
+        if html_part is not None:
+            html_part.add_related(
+                payload,
+                maintype="image",
+                subtype=fmt.lower(),
+                cid=cid,
+                filename=filename,
+            )
+    else:
+        msg.add_attachment(
+            payload,
+            maintype="image",
+            subtype=fmt.lower(),
+            filename=filename,
+        )
 
     # Send via SMTP
     context = ssl.create_default_context()

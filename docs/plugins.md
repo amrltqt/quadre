@@ -57,8 +57,8 @@ Notes:
   - Options: `format` (default from context).
   - Code: `src/quadre/plugins/builtin.py:35`.
 
-- `email`: sends the image as an email attachment via SMTP (stdlib-only).
-  - Options (cfg): `to` (required), `from`, `subject`, `host` (required unless via env), `port` (default 587), `user`, `password`, `use_tls` (default true), `use_ssl` (default false), `timeout`, `format`, `body`.
+- `email`: sends the image as an email attachment or inline via SMTP (stdlib-only).
+  - Options (cfg): `to` (required), `from`, `subject`, `host` (required unless via env), `port` (default 587), `user`, `password`, `use_tls` (default true), `use_ssl` (default false), `timeout`, `format`, `body`, `inline` (bool), `html_body` (string; may contain `{cid}`).
   - Env vars (secrets/connection only): `QUADRE_EMAIL_HOST`, `QUADRE_EMAIL_PORT`, `QUADRE_EMAIL_USER`, `QUADRE_EMAIL_PASSWORD`, `QUADRE_EMAIL_TLS`, `QUADRE_EMAIL_SSL`, `QUADRE_EMAIL_TIMEOUT`, `QUADRE_EMAIL_FORMAT`.
   - Code: `src/quadre/plugins/email.py`.
 
@@ -135,98 +135,87 @@ Then in your document:
 ]
 ```
 
-## Writing a plugin (example: Email)
+## Using the built-in Email plugin
 
-A minimal email plugin that encodes the image and sends it as an attachment via SMTP.
+A minimal email output is included and auto‑registered as `email` (stdlib‑only, no extra deps). It encodes the image and sends it as an attachment via SMTP.
 
-```
-# quadre_plugin_email/__init__.py
-import io
-import smtplib
-from email.message import EmailMessage
-from quadre.plugins import register_plugin
+- Configure secrets/connexion in env: `QUADRE_EMAIL_HOST` (+ optionally `QUADRE_EMAIL_USER`, `QUADRE_EMAIL_PASSWORD`, `QUADRE_EMAIL_TLS`/`QUADRE_EMAIL_SSL`).
+- Pass routing/metadata in the document or programmatically: `to` (required), `from`, `subject`, `body`.
 
-def email_plugin(image, ctx, cfg):
-    """
-    cfg expects:
-      {
-        "to": "alice@example.com, bob@example.com",
-        "from": "no-reply@example.com",
-        "subject": "Dashboard",
-        "host": "smtp.example.com",
-        "port": 587,
-        "user": "smtp-user",          # optional
-        "password": "smtp-pass",      # optional
-        "use_tls": true,               # starttls (default true)
-        "format": "PNG"               # optional; defaults to ctx.format
-      }
-    """
-    # Encode image
-    buf = io.BytesIO()
-    fmt = (cfg.get("format") or ctx.format)
-    image.save(buf, format=fmt)
-    payload = buf.getvalue()
-
-    # Build message
-    msg = EmailMessage()
-    msg["Subject"] = cfg.get("subject", "Dashboard")
-    msg["From"] = cfg.get("from", "no-reply@example.com")
-    msg["To"] = cfg.get("to")
-    maintype, subtype = "image", fmt.lower()
-    filename = (ctx.path or f"dashboard.{subtype}").split("/")[-1]
-    msg.set_content("See attached dashboard")
-    msg.add_attachment(payload, maintype=maintype, subtype=subtype, filename=filename)
-
-    # Send via SMTP
-    host = cfg.get("host")
-    port = int(cfg.get("port", 587))
-    use_tls = bool(cfg.get("use_tls", True))
-    if not host:
-        raise ValueError("email plugin requires 'host'")
-    with smtplib.SMTP(host, port) as s:
-        if use_tls:
-            s.starttls()
-        user = cfg.get("user")
-        pwd = cfg.get("password")
-        if user and pwd:
-            s.login(user, pwd)
-        s.send_message(msg)
-    return f"email://{msg['To']}"
-
-register_plugin("email", email_plugin)
-```
-
-Or expose it via entry points so Quadre auto‑discovers it:
+Document example:
 
 ```
-# pyproject.toml (of your plugin package)
-[project.entry-points."quadre.output_plugins"]
-email = "quadre_plugin_email:email_plugin"
+{
+  "outputs": [
+    { "plugin": "file", "path": "out.png" },
+    {
+      "plugin": "email",
+      "to": "team@example.com",
+      "from": "no-reply@example.com",
+      "subject": "Daily Dashboard"
+    }
+  ]
+}
 ```
 
-Use it from a document:
+CLI:
 
 ```
-"outputs": [
-  { "plugin": "file", "path": "out.png" },
-  {
-    "plugin": "email",
-    "to": "team@example.com",
-    "from": "no-reply@example.com",
-    "subject": "Daily Dashboard",
-    "host": "smtp.example.com",
-    "port": 587,
-    "user": "smtp-user",
-    "password": "smtp-pass",
-    "use_tls": true,
-    "format": "PNG"
-  }
-]
+export QUADRE_EMAIL_HOST="smtp.example.com"
+export QUADRE_EMAIL_USER="smtp-user"
+export QUADRE_EMAIL_PASSWORD="smtp-pass"
+quadre render examples/declarative_featured.json out.png
+```
+
+Programmatic:
+
+```
+from quadre import render
+render(doc, outputs={
+  "plugin": "email",
+  "to": "team@example.com",
+  "from": "no-reply@example.com",
+  "subject": "Daily Dashboard"
+})
+```
+
+Inline (CID) example:
+
+```
+{
+  "outputs": [
+    {
+      "plugin": "email",
+      "to": "team@example.com",
+      "from": "no-reply@example.com",
+      "subject": "Dashboard inline",
+      "inline": true
+    }
+  ]
+}
+```
+
+Custom HTML body with CID placeholder:
+
+```
+{
+  "outputs": [
+    {
+      "plugin": "email",
+      "to": "team@example.com",
+      "from": "no-reply@example.com",
+      "subject": "Dashboard inline",
+      "inline": true,
+      "html_body": "<h1>Report</h1><p>See inline:</p><img src=\"cid:{cid}\" alt=\"dashboard\">"
+    }
+  ]
+}
 ```
 
 Notes:
-- Keep credentials out of JSON if possible (e.g., read from environment inside the plugin).
-- For large attachments, consider WEBP or JPEG to reduce size; set `format` accordingly.
+- STARTTLS est activé par défaut (`use_tls: true`). Pour SMTPS, ajoutez `use_ssl: true` (port 465 typique).
+- Changez le format joint avec `format: "WEBP"` (ou via `QUADRE_EMAIL_FORMAT`).
+- Gardez les identifiants hors JSON (utilisez `QUADRE_EMAIL_*`).
 
 ### Email plugin configuration
 

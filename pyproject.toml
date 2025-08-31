@@ -8,6 +8,11 @@ dependencies = [ "pillow>=11.3.0", "pydantic>=2.7,<3" ]
 classifiers = [ "Typing :: Typed", "License :: OSI Approved :: MIT License" ]
 
 
+[project.urls]
+Repository = "https://github.com/amrltqt/quadre"
+Issues = "https://github.com/amrltqt/quadre/issues"
+
+
 [[project.authors]]
 name = "Quentin Amirault"
 email = "amirault.quentin@gmail.com"
