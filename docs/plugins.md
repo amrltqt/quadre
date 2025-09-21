@@ -5,13 +5,12 @@ File saving remains the default behavior, but you can add optional outputs like 
 
 ## Concepts
 
-- Plugin: a callable that receives the rendered `PIL.Image.Image`, an `OutputContext`, and a config dict.
+- Plugin: a callable that receives the rendered `cairo.ImageSurface`, an `OutputContext`, and a config dict.
 - Dispatch: the renderer builds the image and dispatches to one or more plugins defined in the document under `output` or `outputs`.
 - Builtins: `file` (write to disk) and `bytes` (return encoded bytes) are included.
 
 Relevant code:
-- `src/quadre/flex/runner.py:19` — `build_dashboard_image(data)` creates an image but does not save it.
-- `src/quadre/flex/runner.py:135` — `render_dashboard_with_flex(data, out_path)` renders then dispatches outputs (default: file to `out_path`).
+- `src/quadre/generator.py:25` — `generate_image(document)` returns a Cairo surface.
 - `src/quadre/plugins/registry.py:13` — `OutputContext` (path, format, doc, size).
 - `src/quadre/plugins/registry.py:33` — `register_plugin(name, fn)`.
 - `src/quadre/plugins/registry.py:84` — `dispatch_outputs(image, outputs_spec, default_path, doc)`.
@@ -31,7 +30,7 @@ Accepted shapes:
 
 2) Single object — explicit plugin and options
 ```
-"output": { "plugin": "file", "path": "out.webp", "format": "WEBP" }
+"output": { "plugin": "file", "path": "out.png", "format": "PNG" }
 ```
 
 3) List — multiple outputs
@@ -44,54 +43,50 @@ Accepted shapes:
 
 Notes:
 - If no `output(s)` is provided, the renderer defaults to `file` at the `out_path` parameter.
-- If `format` is not set, it is inferred from the path extension (`.png`→PNG, `.jpg`→JPEG, `.webp`→WEBP, default PNG).
+- Formats other than PNG are not currently supported; the renderer always outputs PNG surfaces.
 - The CLI prints only the file path; plugin return values are not displayed. Programmatic callers can invoke `dispatch_outputs` directly to capture results.
 
 ## Built-in plugins
 
-- `file`: writes the image to disk.
-  - Options: `path` (override), `format` (e.g., `PNG`, `JPEG`, `WEBP`), `save_kwargs` (extra Pillow `save()` kwargs).
+- `file`: writes the image to disk (PNG only).
+  - Options: `path` (override), `format` (must be `PNG`).
   - Code: `src/quadre/plugins/builtin.py:18`.
 
-- `bytes`: returns encoded image bytes (useful programmatically, not via CLI).
-  - Options: `format` (default from context).
+- `bytes`: returns encoded PNG bytes (useful programmatically, not via CLI).
+  - Options: `format` (must be `PNG`).
   - Code: `src/quadre/plugins/builtin.py:35`.
 
 - `email`: sends the image as an email attachment or inline via SMTP (stdlib-only).
-  - Options (cfg): `to` (required), `from`, `subject`, `host` (required unless via env), `port` (default 587), `user`, `password`, `use_tls` (default true), `use_ssl` (default false), `timeout`, `format`, `body`, `inline` (bool), `html_body` (string; may contain `{cid}`).
+  - Options (cfg): `to` (required), `from`, `subject`, `host` (required unless via env), `port` (default 587), `user`, `password`, `use_tls` (default true), `use_ssl` (default false), `timeout`, `format` (PNG only), `body`, `inline` (bool), `html_body` (string; may contain `{cid}`).
   - Env vars (secrets/connection only): `QUADRE_EMAIL_HOST`, `QUADRE_EMAIL_PORT`, `QUADRE_EMAIL_USER`, `QUADRE_EMAIL_PASSWORD`, `QUADRE_EMAIL_TLS`, `QUADRE_EMAIL_SSL`, `QUADRE_EMAIL_TIMEOUT`, `QUADRE_EMAIL_FORMAT`.
   - Code: `src/quadre/plugins/email.py`.
 
 ## Programmatic usage (Python)
 
-Prefer the high-level API for most use cases:
+Prefer the high-level helpers and the generator:
 
 ```
-from quadre import render, build_image, to_bytes
-
-# File output (default plugin)
-render(doc, path="out.png")
-
-# Multiple outputs
-render(doc, outputs=[
-  {"plugin": "file", "path": "out.webp", "format": "WEBP"},
-  {"plugin": "bytes"},  # returns encoded bytes
-])
-
-# Get a Pillow image or encoded bytes
-img = build_image(doc)
-buf = to_bytes(doc, "PNG")
-```
-
-Advanced: you can still use lower-level functions if you need tighter control:
-
-```
-from quadre.flex.runner import build_dashboard_image
+from quadre.generator import generate_image
 from quadre.plugins import dispatch_outputs, image_to_bytes
 
-img = build_dashboard_image(doc)
-dispatch_outputs(img, doc.get("outputs") or doc.get("output"), default_path="out.png", doc=doc)
-png_bytes = image_to_bytes(img, format="PNG")
+surface = generate_image(doc)
+
+# File output (default plugin)
+dispatch_outputs(surface, doc.get("outputs"), default_path="out/dashboard.png", doc=doc)
+
+# Get PNG bytes
+buf = image_to_bytes(surface, "PNG")
+```
+
+Need lower-level control? Work with the surface directly:
+
+```
+from quadre.generator import generate_image
+from quadre.plugins import dispatch_outputs, image_to_bytes
+
+surface = generate_image(doc)
+dispatch_outputs(surface, doc.get("outputs") or doc.get("output"), default_path="out.png", doc=doc)
+png_bytes = image_to_bytes(surface, format="PNG")
 ```
 
 ## Writing a plugin (example: S3)
@@ -105,15 +100,16 @@ import io
 import boto3
 from quadre.plugins import register_plugin
 
-def s3_plugin(image, ctx, cfg):
-    # cfg expects: {"bucket": "...", "key": "...", "format"?: "PNG"|"JPEG"|...}
+def s3_plugin(surface, ctx, cfg):
+    # cfg expects: {"bucket": "...", "key": "..."}
+    fmt = (cfg.get("format") or ctx.format).upper()
+    if fmt != "PNG":
+        raise ValueError("S3 plugin example only supports PNG with the Cairo backend")
     buf = io.BytesIO()
-    fmt = (cfg.get("format") or ctx.format)
-    image.save(buf, format=fmt)
-    buf.seek(0)
+    surface.write_to_png(buf)
     boto3.client("s3").put_object(
         Bucket=cfg["bucket"], Key=cfg["key"], Body=buf.getvalue(),
-        ContentType=f"image/{fmt.lower()}"
+        ContentType="image/png"
     )
     return f"s3://{cfg['bucket']}/{cfg['key']}"
 
@@ -214,7 +210,7 @@ Custom HTML body with CID placeholder:
 
 Notes:
 - STARTTLS est activé par défaut (`use_tls: true`). Pour SMTPS, ajoutez `use_ssl: true` (port 465 typique).
-- Changez le format joint avec `format: "WEBP"` (ou via `QUADRE_EMAIL_FORMAT`).
+- Changez le format joint avec `format: "PNG"` (ou via `QUADRE_EMAIL_FORMAT`).
 - Gardez les identifiants hors JSON (utilisez `QUADRE_EMAIL_*`).
 
 ### Email plugin configuration

@@ -1,10 +1,13 @@
 [project]
 name = "quadre"
 version = "0.1.1"
-description = "A Python CLI tool that generates beautiful dashboard images from JSON data using PIL/Pillow"
+description = "A Python CLI tool that generates beautiful dashboard images from JSON data using Cairo"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = [ "pillow>=11.3.0", "pydantic>=2.7,<3" ]
+dependencies = [
+ "pycairo>=1.28.0",
+ "pydantic>=2.7,<3",
+]
 classifiers = [ "Typing :: Typed", "License :: OSI Approved :: MIT License" ]
 
 
@@ -46,6 +49,18 @@ include = [
 "LICENSE"
 ]
 
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.pyright]
+include = ["src"]
+pythonPath = "src"
+typeCheckingMode = "basic"
 
 [dependency-groups]
-dev = [ "pytest>=8.4.1", "ruff>=0.12.11", "twine>=6.1.0" ]
+dev = [
+    "pytest>=8.4.1",
+    "ruff>=0.12.11",
+    "twine>=6.1.0"
+]

@@ -14,7 +14,7 @@ The “Flex” layer is intentionally simple and focused on layout. Visuals live
 
 ## Data Flow
 
-Document (JSON) → validation → adapter builds a Flex tree → runner applies theme/scale → engine measures preferred height → engine renders into an image → optional downscale/sharpen → plugins write outputs.
+Document (JSON) → validation → adapter builds a Flex tree → runner applies theme/scale → engine measures preferred height → engine renders into a Cairo surface → plugins write outputs.
 
 ## Key Modules
 
@@ -31,7 +31,7 @@ Flex Widgets (src/quadre/flex/widgets.py)
 Adapters & Runner (src/quadre/flex)
 - adapter.build_layout_from_declarative: interprets the declarative `layout` array. Supports node types such as `title`, `text`, `spacer`, `kpi_card`, `table`, `row`, `column`, `grid`. Container properties (gap, padding, bg_fill/outline/radius, shadow, etc.) are applied on FlexContainer.
 - helpers: shared builders for text/table/spacer and theme‑driven defaults.
-- runner.build_dashboard_image / render_dashboard_with_flex: load theme, apply supersampling, measure preferred height, render, then optionally downscale and apply an unsharp mask. Canvas options include `height` (auto/fixed/px), `min_height`, `max_height`, `scale`, `downscale`, `sharpen`, `padding`, `gap`, and `top/bottom_margin`.
+- generator.generate_image: load theme, apply supersampling, measure preferred height, render to a Cairo surface, and hand it to the output plugins. Canvas options include `height` (auto/fixed/px), `min_height`, `max_height`, `scale`, `padding`, `gap`, and `top/bottom_margin`.
 
 Components (src/quadre/components)
 - config: global `COLORS`, `DIMENSIONS`, `FONTS` + `set_scale/reset_scale/apply_theme`. This is the only place where font sizes and scaling are managed.
@@ -60,15 +60,15 @@ Plugins (src/quadre/plugins)
 - Registry (plugins/registry.py): defines `PluginFn`, `OutputContext`, a global registry, and `dispatch_outputs(image, outputs_spec, default_path, doc)`.
 - Built‑ins (plugins/builtin.py): registers `file` and `bytes` on import.
 - Loader (plugins/__init__.py): imports built‑ins and discovers external plugins in the `quadre.output_plugins` entry point group (either a callable or a module exposing `register(register_plugin)`).
-- Programmatic helper (plugins/utils.py): `image_to_bytes(img, format)`.
+- Programmatic helper (plugins/utils.py): `image_to_bytes(surface, format)` (PNG only).
 
 Outputs Spec
 - At the document level, you can specify either `output` (single) or `outputs` (list). Each item is a dict with at least `plugin` (name), plus optional `path` and other plugin‑specific keys. If unspecified, the runner uses the built‑in `file` plugin with the path/format implied by the CLI or API.
 - Example:
-  - `{"outputs": [ {"plugin": "file", "path": "out.webp", "format": "WEBP"}, {"plugin": "bytes"} ] }`
+  - `{"outputs": [ {"plugin": "file", "path": "out.png", "format": "PNG"}, {"plugin": "bytes"} ] }`
 
 Writing a plugin
-- Signature: `def my_plugin(image: PIL.Image, ctx: OutputContext, cfg: Mapping[str, Any]) -> Any`
+- Signature: `def my_plugin(surface: cairo.ImageSurface, ctx: OutputContext, cfg: Mapping[str, Any]) -> Any`
 - Register in code: `from quadre import register_output_plugin; register_output_plugin("my", my_plugin)`
 - Or expose via entry points in your package metadata under group `quadre.output_plugins`.
 
@@ -79,8 +79,7 @@ Writing a plugin
 3) Supersampling: if `canvas.scale > 1`, `set_scale()` updates dimensions and fonts to render at higher DPI.
 4) Measure height: the flex root is measured with a very tall available height to determine the preferred content height.
 5) Render: the tree renders into a canvas. Children are clipped to their boxes to prevent visual overlap.
-6) Post‑processing: optional downscale back to base size (`downscale=true`) and optional sharpen (`sharpen: true|0..1|{amount,radius,percent,threshold}`).
-7) Output: plugins receive the final PIL image and write it to the requested destinations.
+6) Output: plugins receive the final Cairo surface (PNG encoding is built-in) and write it to the requested destinations.
 
 ## Fonts & Determinism
 

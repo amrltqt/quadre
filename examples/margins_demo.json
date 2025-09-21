@@ -1,0 +1,72 @@
+{
+  "canvas": {
+    "width": 600,
+    "font_family": "Inter",
+    "scale": 2,
+    "margin": {
+      "top": 40,
+      "bottom": 40,
+      "left": 60,
+      "right": 60
+    }
+  },
+  "components": [
+    {
+      "type": "title",
+      "text": "Dashboard avec marges personnalisées",
+      "size": "h1",
+      "align": "center",
+      "color": "PRIMARY"
+    },
+    {
+      "type": "title",
+      "text": "Marges : 40px haut/bas, 60px gauche/droite",
+      "size": "body",
+      "align": "center",
+      "color": "MUTED_FOREGROUND"
+    },
+    {
+      "type": "column",
+      "gap": 20,
+      "children": [
+        {
+          "type": "title",
+          "text": "Métriques avec espacement",
+          "size": "h2",
+          "align": "left"
+        },
+        {
+          "type": "row",
+          "gap": 30,
+          "children": [
+            {
+              "type": "kpi_card",
+              "label": "Revenus",
+              "value": "12,450€",
+              "delta": 8.5,
+              "delta_label": "ce mois"
+            },
+            {
+              "type": "kpi_card",
+              "label": "Clients",
+              "value": "1,247",
+              "delta": 15.2,
+              "delta_label": "nouveaux"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "card",
+      "value": "Cette carte respecte les marges définies dans le canvas. Le contenu n'atteint jamais les bords de l'image."
+    },
+    {
+      "type": "title",
+      "text": "Parfait pour les exports et présentations",
+      "size": "h3",
+      "align": "center",
+      "color": "SUCCESS"
+    }
+  ]
+}

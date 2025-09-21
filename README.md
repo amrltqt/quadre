@@ -1,10 +1,12 @@
 # quadre
 
-A Python tool that generates beautiful, serializable dashboard images from JSON using Pillow.
+A Python tool that generates beautiful, serializable dashboard images from JSON using Cairo.
 Dashboard images are easy to share across slack, emails or any communication software that manage.
 
 Use image to make your dashboards accessible by everyone.
 
+
+> Tip: For the sharpest typography, install `pygobject` (and its system dependencies) so Quadre can leverage PangoCairo. On macOS: `brew install pygobject3`, then `pip install pygobject`.
 For complete docs, see docs/index.md.
 
 ## Quickstart
@@ -33,21 +35,22 @@ quadre validate examples/declarative_featured.json
 Install and render from Python without touching disk or with custom outputs:
 
 ```python
-from quadre import render, build_image, to_bytes
+from quadre.generator import generate_image
+from quadre.plugins import dispatch_outputs, image_to_bytes
+
+surface = generate_image(doc)
 
 # 1) Simple: write a file (default plugin)
-render(doc, path="out.png")
+dispatch_outputs(surface, doc.get("outputs"), default_path="out.png", doc=doc)
 
-# 2) Multiple outputs: file + anything else
-render(doc, outputs=[
-  {"plugin": "file", "path": "out.webp", "format": "WEBP"},
-  # Example: if you installed a third-party plugin registered as "s3"
-  {"plugin": "s3", "bucket": "my-bucket", "key": "dashboards/out.png"},
-])
+# 2) Custom outputs
+dispatch_outputs(surface, [
+  {"plugin": "file", "path": "out.png", "format": "PNG"},
+  {"plugin": "bytes"},  # returns encoded PNG bytes
+], default_path="out.png", doc=doc)
 
 # 3) In-memory usage
-img = build_image(doc)          # PIL.Image
-data = to_bytes(doc, "PNG")     # bytes
+png_bytes = image_to_bytes(surface, "PNG")
 ```
 
 ### Typed Builder (optional)
@@ -187,8 +190,7 @@ High-quality rendering via supersampling is available (optional). Enable with:
 ```json
 "canvas": {
   "height": "auto",
-  "scale": 2.0,           // render at 2x
-  "downscale": true       // downscale to base size with Lanczos
+  "scale": 2.0            // render at 2x (output width remains the canvas width)
 }
 ```
 

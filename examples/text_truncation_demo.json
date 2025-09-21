@@ -1,0 +1,144 @@
+{
+  "canvas": {
+    "width": 500,
+    "font_family": "Inter",
+    "scale": 2,
+    "margin": {
+      "top": 30,
+      "bottom": 30,
+      "left": 40,
+      "right": 40
+    }
+  },
+  "components": [
+    {
+      "type": "title",
+      "text": "Test de Troncature des Textes",
+      "size": "h1",
+      "align": "center",
+      "color": "PRIMARY"
+    },
+    {
+      "type": "title",
+      "text": "Ce titre est volontairement très très très très très très très long pour tester la troncature automatique avec des ellipses",
+      "size": "h2",
+      "align": "left",
+      "color": "FOREGROUND"
+    },
+    {
+      "type": "row",
+      "gap": 15,
+      "children": [
+        {
+          "type": "kpi_card",
+          "label": "Revenus Annuels Totaux",
+          "value": "1,234,567.89€",
+          "delta": 25.7,
+          "delta_label": "par rapport à l'année dernière"
+        },
+        {
+          "type": "kpi_card",
+          "label": "Nombre de clients actifs dans la base de données",
+          "value": "8,456,123",
+          "delta": -5.2,
+          "delta_label": "évolution mensuelle"
+        }
+      ]
+    },
+    {
+      "type": "column",
+      "gap": 10,
+      "children": [
+        {
+          "type": "title",
+          "text": "Cartes avec texte long",
+          "size": "h3",
+          "align": "left"
+        },
+        {
+          "type": "card",
+          "value": "Cette carte contient un texte extrêmement long qui va certainement dépasser la largeur allouée. Le système devrait automatiquement tronquer ce texte en ajoutant des points de suspension pour indiquer qu'il y a plus de contenu. C'est un test important pour s'assurer que l'interface reste propre même avec des contenus verbeux."
+        },
+        {
+          "type": "card",
+          "value": "Texte court"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "gap": 20,
+      "children": [
+        {
+          "type": "column",
+          "children": [
+            {
+              "type": "title",
+              "text": "Colonne Étroite avec Titre Très Long",
+              "size": "h4",
+              "align": "left"
+            },
+            {
+              "type": "kpi_card",
+              "label": "Métrique",
+              "value": "999,999,999.99€",
+              "delta": 100.5
+            }
+          ]
+        },
+        {
+          "type": "column",
+          "children": [
+            {
+              "type": "title",
+              "text": "Autre Colonne",
+              "size": "h4",
+              "align": "center"
+            },
+            {
+              "type": "card",
+              "value": "Texte dans une colonne étroite qui devrait être tronqué proprement."
+            }
+          ]
+        },
+        {
+          "type": "column",
+          "children": [
+            {
+              "type": "title",
+              "text": "Troisième Colonne avec un Titre Encore Plus Long que les Autres",
+              "size": "h4",
+              "align": "right"
+            },
+            {
+              "type": "kpi_card",
+              "label": "Pourcentage de Conversion des Utilisateurs Premium",
+              "value": "87.34%"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "title",
+      "text": "Test d'alignements avec troncature: gauche",
+      "size": "body",
+      "align": "left",
+      "color": "MUTED_FOREGROUND"
+    },
+    {
+      "type": "title",
+      "text": "Test d'alignements avec troncature: centré avec un texte très long",
+      "size": "body",
+      "align": "center",
+      "color": "MUTED_FOREGROUND"
+    },
+    {
+      "type": "title",
+      "text": "Test d'alignements avec troncature: droite avec texte long",
+      "size": "body",
+      "align": "right",
+      "color": "MUTED_FOREGROUND"
+    }
+  ]
+}

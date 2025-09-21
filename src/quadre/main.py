@@ -8,26 +8,9 @@ High-level functions for rendering dashboards from Python.
 import json
 import sys
 
-from quadre.flex.runner import render_dashboard_with_flex
-from quadre.flex.runner import build_dashboard_image
+from quadre.generator import generate_image
 from quadre.plugins import image_to_bytes
-
-
-def render_dashboard(data: dict, out_path: str = "dashboard.png") -> str:
-    """
-    Render complete dashboard from data using modular components.
-
-    Args:
-        data: Dashboard data dictionary
-        out_path: Output file path
-
-    Returns:
-        Path to generated dashboard file
-    """
-    # Single rendering path: Flex engine
-    return render_dashboard_with_flex(data, out_path)
-
-    # Legacy procedural renderer removed in favor of Flex for the default path.
+from quadre.models import DocumentDef
 
 
 def render_dashboard_bytes(data: dict, format: str = "PNG") -> bytes:
@@ -35,8 +18,8 @@ def render_dashboard_bytes(data: dict, format: str = "PNG") -> bytes:
     Render the dashboard and return encoded image bytes (PNG by default).
 
     This is a programmatic API that avoids writing to disk and is suitable for
-    piping the result to third-party systems. To change format, pass e.g.
-    format="WEBP" or "JPEG".
+    piping the result to third-party systems. The Cairo backend currently
+    supports PNG output only; other formats will raise `ValueError`.
 
     Args:
         data: Dashboard data dictionary
@@ -45,8 +28,9 @@ def render_dashboard_bytes(data: dict, format: str = "PNG") -> bytes:
     Returns:
         Encoded image bytes
     """
-    img = build_dashboard_image(data)
-    return image_to_bytes(img, format=format)
+    doc = data if isinstance(data, DocumentDef) else DocumentDef.model_validate(data)
+    surface = generate_image(doc)
+    return image_to_bytes(surface, format=format)
 
 
 def load_data_from_json(json_path: str) -> dict:
@@ -74,10 +58,3 @@ def load_data_from_json(json_path: str) -> dict:
     except Exception as e:
         print(f"Error reading '{json_path}': {e}")
         sys.exit(1)
-
-
-__all__ = [
-    "render_dashboard",
-    "render_dashboard_bytes",
-    "load_data_from_json",
-]

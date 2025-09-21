@@ -1,0 +1,36 @@
+{
+  "canvas": {
+    "width": 600,
+    "font_family": "Helvetica",
+    "scale": 2
+  },
+  "components": [
+    {
+      "type": "row",
+      "children": [
+        {
+          "type": "kpi_card",
+          "label": "Mon kpi",
+          "value": "1524$",
+          "delta": 5.2,
+          "delta_label": "vs_last_week"
+        },
+        {
+          "type": "card",
+          "value": "Je pense qu'il faut faire un essai pour un text très long, vraiment très long pour voir si c'est géré"
+        }
+      ]
+    },
+    {
+      "type": "kpi_card",
+      "label": "Mon kpi",
+      "value": "1524$",
+      "delta": 5.2,
+      "delta_label": "vs_last_week"
+    },
+    {
+      "type": "card",
+      "value": "Je pense qu'il faut faire un essai pour un text très long, vraiment très long pour voir si c'est géré"
+    }
+  ]
+}

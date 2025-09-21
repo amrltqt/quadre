@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """
 Theme system for quadre.
 
@@ -17,6 +15,8 @@ Renderer integration:
 
 Widgets can still override properties explicitly in layout nodes.
 """
+
+from __future__ import annotations
 
 import json
 import os

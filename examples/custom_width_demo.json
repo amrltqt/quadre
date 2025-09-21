@@ -1,0 +1,71 @@
+{
+  "canvas": {
+    "width": 400,
+    "font_family": "Inter",
+    "scale": 2
+  },
+  "components": [
+    {
+      "type": "title",
+      "text": "Canvas étroit (400px)",
+      "size": "h2",
+      "align": "center",
+      "color": "PRIMARY"
+    },
+    {
+      "type": "title",
+      "text": "Ce dashboard utilise une largeur personnalisée de 400px au lieu des 1920px par défaut",
+      "size": "body",
+      "align": "center",
+      "color": "MUTED_FOREGROUND"
+    },
+    {
+      "type": "column",
+      "gap": 15,
+      "children": [
+        {
+          "type": "title",
+          "text": "Métriques compactes",
+          "size": "h3",
+          "align": "left"
+        },
+        {
+          "type": "kpi_card",
+          "label": "Revenus",
+          "value": "5,240€",
+          "delta": 8.3,
+          "delta_label": "ce mois"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "gap": 20,
+      "children": [
+        {
+          "type": "kpi_card",
+          "label": "Vues",
+          "value": "1,247",
+          "delta": 15.2
+        },
+        {
+          "type": "kpi_card",
+          "label": "Clics",
+          "value": "89",
+          "delta": -3.1
+        }
+      ]
+    },
+    {
+      "type": "card",
+      "value": "Cette carte s'adapte automatiquement à la largeur réduite du canvas."
+    },
+    {
+      "type": "title",
+      "text": "Format idéal pour mobile ou intégration",
+      "size": "h4",
+      "align": "center",
+      "color": "SUCCESS"
+    }
+  ]
+}

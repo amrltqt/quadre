@@ -11,34 +11,17 @@ Components are organized by complexity and responsibility:
 - layouts: Layout management components
 """
 
-from .config import COLORS, FONTS, DIMENSIONS
-from .primitives import rounded_rectangle, badge
-from .cards import KPICard, SectionCard
-from .tables import (
-    EnhancedTable,
-    ColumnDefinition,
-    TableStyle,
-    CellAlignment,
-    CellType,
-)
-from .image import ImageBlock
-from .progress import ProgressBar
-from .status_badge import StatusBadge
+from quadre.config import COLORS, FONTS, DIMENSIONS
+from quadre.components.primitives import rounded_rectangle
+from quadre.components.registry import Component, COMPONENTS, component_discovery
+
 
 __all__ = [
+    "COMPONENTS",
+    "Component",
+    "component_discovery",
     "COLORS",
     "FONTS",
     "DIMENSIONS",
     "rounded_rectangle",
-    "badge",
-    "KPICard",
-    "SectionCard",
-    "EnhancedTable",
-    "ColumnDefinition",
-    "TableStyle",
-    "CellAlignment",
-    "CellType",
-    "ImageBlock",
-    "ProgressBar",
-    "StatusBadge",
 ]

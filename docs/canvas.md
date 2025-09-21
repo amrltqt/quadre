@@ -24,35 +24,27 @@ Fixed height examples:
 
 ## Supersampling
 
-Render at higher DPI and (optionally) downscale for crisper text and edges:
+Render at higher DPI for crisper text and edges:
 
-- `scale: number` – e.g. `2.0` renders at 2× resolution
-- `downscale: true|false` – when true, the final image is resized back to the base size using a high‑quality filter
+- `scale: number` – e.g. `2.0` renders at 2× resolution before the surface is resampled back to the requested width.
 
 ```json
 {
-  "canvas": { "height": "auto", "scale": 2.0, "downscale": true }
+  "canvas": { "height": "auto", "scale": 2.0 }
 }
 ```
 
-## Sharpen (optional)
+## Text Rendering & Fonts
 
-After downscaling, you can add a mild unsharp mask to improve perceived text crispness:
+Quadre relies on Cairo's toy text API by default. For even crisper text, install PyGObject so that PangoCairo can be used:
 
-- `sharpen: true` – enable with a default mild amount
-- `sharpen: 0.0..1.0` – control strength (0 disables; 0.25–0.4 recommended)
-- `sharpen: { amount, radius, percent, threshold }` – advanced tuning
-
-```json
-{ "canvas": { "height": "auto", "scale": 2.0, "downscale": true, "sharpen": 0.3 } }
-
-{ "canvas": { "height": "auto", "scale": 3.0, "downscale": true,
-  "sharpen": { "amount": 0.35, "radius": 1.0, "percent": 180, "threshold": 0 } } }
+```bash
+brew install pygobject3  # macOS
+# or apt-get install python3-gi gir1.2-pango-1.0 on Debian/Ubuntu
+pip install pygobject  # inside your venv if needed
 ```
 
-Notes:
-- Sharpen runs on the final image (post-resize). It is disabled by default and does not affect tests unless explicitly set.
-- If you see halos, reduce `percent` or increase `threshold` slightly (e.g., 1–2).
+When `gi.repository.Pango` is available, the renderer automatically uses PangoCairo for measurement and drawing (baseline handling and subpixel positioning are improved).
 
 ## Root Spacing (padding, gap)
 

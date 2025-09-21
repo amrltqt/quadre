@@ -18,7 +18,7 @@ quadre_PIXELS=1 quadre_RECORD=1 uv run pytest -q tests/pixels
 ```
 
 Determinism
-- Tests patch fonts to Pillow's default via `tests/conftest.py` to minimize platform differences.
+- Tests pin fonts via theme overrides to minimize platform differences.
 - Hash checks ensure renders are byte‑stable for given inputs.
 
 Targets
@@ -26,4 +26,3 @@ Targets
 - `tests/test_validator*.py`: schema validation & friendly errors
 - `tests/test_flex_adapter_margins.py`: margin wrappers behavior
 - `tests/test_resolve_path_utils.py`: data path resolver
-

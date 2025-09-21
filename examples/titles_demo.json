@@ -1,0 +1,121 @@
+{
+  "canvas": {
+    "width": 500,
+    "font_family": "Inter",
+    "scale": 2
+  },
+  "components": [
+    {
+      "type": "title",
+      "text": "Dashboard Principal",
+      "size": "h1",
+      "align": "center",
+      "color": "PRIMARY"
+    },
+    {
+      "type": "title",
+      "text": "Section Analytics",
+      "size": "h2",
+      "align": "left",
+      "color": "FOREGROUND"
+    },
+    {
+      "type": "column",
+      "gap": 20,
+      "children": [
+        {
+          "type": "title",
+          "text": "Métriques clés",
+          "size": "h3",
+          "align": "left",
+          "weight": "bold"
+        },
+        {
+          "type": "row",
+          "gap": 30,
+          "children": [
+            {
+              "type": "kpi_card",
+              "label": "Revenus",
+              "value": "15,240€",
+              "delta": 12.5,
+              "delta_label": "vs mois dernier"
+            },
+            {
+              "type": "kpi_card",
+              "label": "Utilisateurs",
+              "value": "8,547",
+              "delta": -2.1,
+              "delta_label": "vs mois dernier"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "title",
+      "text": "Détails supplémentaires",
+      "size": "h4",
+      "align": "left",
+      "color": "MUTED_FOREGROUND"
+    },
+    {
+      "type": "title",
+      "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+      "size": "body",
+      "align": "left",
+      "color": "FOREGROUND"
+    },
+    {
+      "type": "row",
+      "gap": 40,
+      "children": [
+        {
+          "type": "column",
+          "children": [
+            {
+              "type": "title",
+              "text": "Alignement à gauche",
+              "size": "h4",
+              "align": "left"
+            },
+            {
+              "type": "card",
+              "value": "Contenu aligné à gauche pour démonstration"
+            }
+          ]
+        },
+        {
+          "type": "column",
+          "children": [
+            {
+              "type": "title",
+              "text": "Centré",
+              "size": "h4",
+              "align": "center"
+            },
+            {
+              "type": "card",
+              "value": "Contenu centré"
+            }
+          ]
+        },
+        {
+          "type": "column",
+          "children": [
+            {
+              "type": "title",
+              "text": "À droite",
+              "size": "h4",
+              "align": "right"
+            },
+            {
+              "type": "card",
+              "value": "Contenu aligné à droite"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

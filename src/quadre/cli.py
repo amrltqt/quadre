@@ -1,14 +1,22 @@
 from __future__ import annotations
 
+
+
+import logging
+
 import argparse
-import json
 import os
 import sys
 from typing import Optional
 
-from .main import render_dashboard
-from .theme import builtin_theme_path
-from .validator import validate_layout
+
+from quadre.components import component_discovery
+from quadre.generator import generate_image
+from quadre.theme import builtin_theme_path
+from quadre.models import DocumentDef
+
+
+logger = logging.getLogger(__name__)
 
 
 def _apply_theme_arg(theme_arg: Optional[str]) -> Optional[int]:
@@ -27,51 +35,41 @@ def _apply_theme_arg(theme_arg: Optional[str]) -> Optional[int]:
         if path is None:
             path = theme_arg  # treat as explicit path
     if not os.path.exists(str(path)):
-        print(f"[ERROR] Theme not found: {path}")
+        logger.error(f"Theme not found: {path}")
         return 2
     os.environ["quadre_THEME"] = str(path)
     return None
 
 
 def cmd_render(args: argparse.Namespace) -> int:
+
+    # Register components before rendering
+    component_discovery()
+
     # Handle theme selection before reading/validating JSON
     rc = _apply_theme_arg(args.theme)
     if rc:
         return rc
 
+    logger.info("Start rendering process", extra={
+        "input_file": args.input
+    })
+
     with open(args.input, "r", encoding="utf-8") as f:
-        doc = json.load(f)
+        # Read the whole document and validate it
+        doc = DocumentDef.model_validate_json(f.read())
+        logger.debug("Document loaded", extra={
+            "number_of_components": len(doc.components)
+        })
+        try:
+            surface = generate_image(doc)
+            surface.write_to_png(args.output)
+            print(f"Wrote {args.output}")
+            return 0
+        except Exception:
+            logger.exception("Render failed")
+            return 1
 
-    if not args.no_validate:
-        errors, warnings = validate_layout(doc)
-        for w in warnings:
-            print(f"[WARN] {w}")
-        if errors:
-            for e in errors:
-                print(f"[ERROR] {e}")
-            return 2
-
-    try:
-        render_dashboard(doc, args.output)
-        print(f"Wrote {args.output}")
-        return 0
-    except Exception as e:
-        print(f"Render failed: {e}")
-        return 1
-
-
-def cmd_validate(args: argparse.Namespace) -> int:
-    with open(args.input, "r", encoding="utf-8") as f:
-        doc = json.load(f)
-    errors, warnings = validate_layout(doc)
-    for w in warnings:
-        print(f"[WARN] {w}")
-    if errors:
-        for e in errors:
-            print(f"[ERROR] {e}")
-        return 1
-    print("OK: document is valid")
-    return 0
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -88,9 +86,6 @@ def build_parser() -> argparse.ArgumentParser:
     pr.add_argument("--theme", help="Theme to use: 'dark' | 'light' | path/to/theme.json")
     pr.set_defaults(func=cmd_render)
 
-    pv = sub.add_parser("validate", help="Validate JSON document")
-    pv.add_argument("input", help="Input JSON file")
-    pv.set_defaults(func=cmd_validate)
 
     return p
 
@@ -102,14 +97,5 @@ def main(argv: list[str] | None = None) -> None:
     sys.exit(code)
 
 
-def main_validate(argv: list[str] | None = None) -> None:
-    ap = argparse.ArgumentParser(prog="quadre-validate", description="Validate Quadre JSON")
-    ap.add_argument("input", help="Input JSON file")
-    args = ap.parse_args(argv)
-    code = cmd_validate(args)
-    sys.exit(code)
-
-
 if __name__ == "__main__":
     main()
-

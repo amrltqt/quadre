@@ -1,6 +1,6 @@
 # quadre Docs
 
-Welcome to the documentation for quadre (Not A Dashboard App) — a Python toolkit and CLI that renders dashboard PNGs from JSON using Pillow.
+Welcome to the documentation for quadre (Not A Dashboard App) — a Python toolkit and CLI that renders dashboard PNGs from JSON using Cairo.
 
 - What it is: a lightweight Flex layout engine, reusable UI components (text, KPI cards, tables), and a declarative JSON adapter.
 - What you get: a deterministic renderer, schema validation with friendly warnings, and Docker/Make integration.

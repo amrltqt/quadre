@@ -3,7 +3,7 @@
 Top‑level structure
 ```json
 {
-  "canvas": { "height": "auto", "min_height": 600, "max_height": 1600, "scale": 1.0, "downscale": false },
+  "canvas": { "height": "auto", "min_height": 600, "max_height": 1600, "scale": 1.0 },
   "data": { /* your values */ },
   "layout": [ /* list of components */ ]
 }
@@ -12,7 +12,7 @@ Top‑level structure
 Canvas
 - height: "auto" (default), "fixed", or a number
 - min_height, max_height: bounds for auto height
-- scale (float) + downscale (bool): supersampling for high‑quality
+- scale (float): supersampling factor (final output is resampled down to the base width)
 
 Data references
 - Use DataRef objects or strings pointing into `data`:
