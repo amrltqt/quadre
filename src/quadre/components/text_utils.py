@@ -58,7 +58,7 @@ def truncate_text(canvas, text: str, font_spec, max_width: int) -> str:
 
     result = best_text + ellipsis if best_text else ellipsis
 
-    logger.debug(f"Text truncated", extra={
+    logger.debug("Text truncated", extra={
         "original_length": len(text),
         "truncated_length": len(best_text),
         "max_width": max_width,
@@ -129,7 +129,7 @@ def fit_text_multiline(canvas, text: str, font_spec, max_width: int, max_height:
     fitted_text = "\n".join(lines)
     actual_height = len(lines) * line_height
 
-    logger.debug(f"Text fitted to multiline", extra={
+    logger.debug("Text fitted to multiline", extra={
         "original_words": len(words),
         "fitted_lines": len(lines),
         "max_lines": max_lines,

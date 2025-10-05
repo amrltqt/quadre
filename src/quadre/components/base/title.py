@@ -69,7 +69,7 @@ class Title(Component):
         width = min(text_w, avail_w) if avail_w > 0 else text_w
         height = min(text_h + 2 * padding_v, avail_h) if avail_h > 0 else text_h + 2 * padding_v
 
-        logger.debug(f"Title measured", extra={
+        logger.debug("Title measured", extra={
             "text": self.text[:50] + "..." if len(self.text) > 50 else self.text,
             "size": self.size,
             "font_size": font_spec.size,
@@ -124,7 +124,7 @@ class Title(Component):
 
         canvas.draw_text(truncated_text, text_x, text_y, font_spec, color)
 
-        logger.debug(f"Title rendered", extra={
+        logger.debug("Title rendered", extra={
             "original_text": text[:30] + "..." if len(text) > 30 else text,
             "rendered_text": truncated_text[:30] + "..." if len(truncated_text) > 30 else truncated_text,
             "truncated": len(truncated_text) < len(text),

@@ -109,7 +109,7 @@ class Root(Component, FlexLayout):
             min(final_w, avail_w) if avail_w >= 0 else final_w,
             min(final_h, avail_h) if avail_h >= 0 else final_h,
         )
-        logger.debug(f"Root measured", extra={
+        logger.debug("Root measured", extra={
             "available_space": f"{avail_w}x{avail_h}",
             "width_constraint": self.width,
             "margins": f"{self.margin_top},{self.margin_right},{self.margin_bottom},{self.margin_left}",
